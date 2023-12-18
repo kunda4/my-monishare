@@ -1,10 +1,10 @@
-import { Injectable, Logger } from '@nestjs/common'
+import { Injectable, Logger, UnauthorizedException } from '@nestjs/common'
 import { type Except } from 'type-fest'
 
 import { IDatabaseConnection } from '../../persistence/database-connection.interface'
 import { type UserID } from '../user'
 
-import { type Car, type CarID, type CarProperties } from './car'
+import { Car, type CarID, type CarProperties } from './car'
 import { ICarRepository } from './car.repository.interface'
 import { type ICarService } from './car.service.interface'
 
@@ -43,6 +43,18 @@ export class CarService implements ICarService {
     _updates: Partial<Except<CarProperties, 'id'>>,
     _currentUserId: UserID,
   ): Promise<Car> {
-    throw new Error('Not implemented')
+    return this.databaseConnection.transactional(async tx => {
+      if (_updates.ownerId !== _currentUserId) {
+        throw new UnauthorizedException(
+          'You are not allowed to update this car',
+        )
+      }
+      const car = await this.carRepository.get(tx, _carId)
+
+      const updatedCar = new Car({
+        ..._updates,
+        id: car.id,
+      })
+    })
   }
 }
