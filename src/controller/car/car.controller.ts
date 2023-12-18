@@ -22,7 +22,13 @@ import {
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger'
 
-import { Car, type CarID, ICarService, type User } from '../../application'
+import {
+  Car,
+  type CarID,
+  ICarService,
+  type User,
+  CarState,
+} from '../../application'
 import { AuthenticationGuard } from '../authentication.guard'
 import { CurrentUser } from '../current-user.decorator'
 
@@ -96,7 +102,11 @@ export class CarController {
     @CurrentUser() _owner: User,
     @Body() _data: CreateCarDTO,
   ): Promise<CarDTO> {
-    throw new NotImplementedException()
+    const ownerId = _owner.id
+    const state = CarState.LOCKED
+    const newData = { ..._data, ownerId, state }
+    const newCar = await this.carService.create(newData)
+    return CarDTO.fromModel(newCar)
   }
 
   @ApiOperation({
