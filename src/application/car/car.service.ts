@@ -52,9 +52,11 @@ export class CarService implements ICarService {
       const car = await this.carRepository.get(tx, _carId)
 
       const updatedCar = new Car({
+        ...car,
         ..._updates,
-        id: car.id,
+        id: _carId,
       })
+      return this.carRepository.update(tx, updatedCar)
     })
   }
 }
