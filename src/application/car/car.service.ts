@@ -1,13 +1,18 @@
-import { BadRequestException, ConflictException, Injectable, Logger, UnauthorizedException } from '@nestjs/common'
+import {
+  BadRequestException,
+  ConflictException,
+  Injectable,
+  Logger,
+} from '@nestjs/common'
 import { type Except } from 'type-fest'
 
 import { IDatabaseConnection } from '../../persistence/database-connection.interface'
+import { ICarTypeService } from '../car-type/car-type.service.interface'
 import { type UserID } from '../user'
 
 import { Car, type CarID, type CarProperties } from './car'
 import { ICarRepository } from './car.repository.interface'
 import { type ICarService } from './car.service.interface'
-import { ICarTypeService } from '../car-type/car-type.service.interface'
 
 @Injectable()
 export class CarService implements ICarService {
@@ -19,7 +24,7 @@ export class CarService implements ICarService {
   public constructor(
     carRepository: ICarRepository,
     databaseConnection: IDatabaseConnection,
-    carTypeService: ICarTypeService
+    carTypeService: ICarTypeService,
   ) {
     this.carRepository = carRepository
     this.databaseConnection = databaseConnection
@@ -32,7 +37,6 @@ export class CarService implements ICarService {
 
   public async create(_data: Except<CarProperties, 'id'>): Promise<Car> {
     return this.databaseConnection.transactional(async tx => {
-
       await this.carTypeService.get(_data.carTypeId)
 
       if (typeof _data.licensePlate !== 'string')
@@ -70,12 +74,11 @@ export class CarService implements ICarService {
   ): Promise<Car> {
     return this.databaseConnection.transactional(async tx => {
       if (_updates.ownerId !== _currentUserId) {
-        throw new BadRequestException(
-          'You are not allowed to update this car',
-        )
+        throw new BadRequestException('You are not allowed to update this car')
       }
 
-      if(typeof _updates.carTypeId !== "number") throw new BadRequestException("Cartype id must be a number")
+      if (typeof _updates.carTypeId !== 'number')
+        throw new BadRequestException('Cartype id must be a number')
 
       await this.carTypeService.get(_updates.carTypeId)
 
