@@ -3,6 +3,7 @@ import {
   ConflictException,
   Injectable,
   Logger,
+  UnauthorizedException,
 } from '@nestjs/common'
 import { type Except } from 'type-fest'
 
@@ -74,7 +75,9 @@ export class CarService implements ICarService {
   ): Promise<Car> {
     return this.databaseConnection.transactional(async tx => {
       if (_updates.ownerId !== _currentUserId) {
-        throw new BadRequestException('You are not allowed to update this car')
+        throw new UnauthorizedException(
+          'You are not allowed to update this car',
+        )
       }
 
       if (typeof _updates.carTypeId !== 'number')
