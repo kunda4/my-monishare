@@ -1,4 +1,4 @@
-import { Injectable, Logger, UnauthorizedException } from '@nestjs/common'
+import { ConflictException, Injectable, Logger, UnauthorizedException } from '@nestjs/common'
 import { type Except } from 'type-fest'
 
 import { IDatabaseConnection } from '../../persistence/database-connection.interface'
@@ -27,9 +27,14 @@ export class CarService implements ICarService {
   /* eslint-disable @typescript-eslint/require-await */
 
   public async create(_data: Except<CarProperties, 'id'>): Promise<Car> {
-    return this.databaseConnection.transactional(tx =>
-      this.carRepository.insert(tx, _data),
-    )
+    return this.databaseConnection.transactional(async tx => {
+      if(typeof _data.licensePlate !== "string" ) throw new Error("License plate must be string")
+
+      const carWithLicensePlate = await this.carRepository.findByLicensePlate(tx, _data.licensePlate)
+      if(carWithLicensePlate) throw new ConflictException('License plate already exists')
+
+      return this.carRepository.insert(tx, _data)
+    })
   }
 
   public async getAll(): Promise<Car[]> {
@@ -57,6 +62,11 @@ export class CarService implements ICarService {
           'You are not allowed to update this car',
         )
       }
+      if(typeof _updates.licensePlate !== "string") throw new Error("License plate must be string")
+      const carWithLicensePlate = await this.carRepository.findByLicensePlate(tx, _updates.licensePlate)
+
+      if(carWithLicensePlate) throw new ConflictException("Car with license plate already exists")
+
       const car = await this.carRepository.get(tx, _carId)
 
       const updatedCar = new Car({
