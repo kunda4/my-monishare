@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common'
 import { type Except } from 'type-fest'
 
 import {
+  type CarType,
   type CarID,
   type CarProperties,
   type CarState,
@@ -75,14 +76,17 @@ export class CarRepository implements ICarRepository {
     _tx: Transaction,
     _licensePlate: string,
   ): Promise<Car | null> {
-    const row = await _tx.oneOrNone<Row>(`
+    const row = await _tx.oneOrNone<Row>(
+      `
     SELECT * FROM cars
     WHERE license_plate = $(licensePlate)
-    `, {
-      licensePlate: _licensePlate
-    })
+    `,
+      {
+        licensePlate: _licensePlate,
+      },
+    )
 
-    return row ? rowToDomain(row) : null;
+    return row ? rowToDomain(row) : null
   }
 
   public async update(_tx: Transaction, _car: Car): Promise<Car> {
