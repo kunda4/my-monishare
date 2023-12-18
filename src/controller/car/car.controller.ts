@@ -2,7 +2,6 @@ import {
   Body,
   Controller,
   Get,
-  NotImplementedException,
   Param,
   ParseIntPipe,
   Patch,
@@ -22,7 +21,13 @@ import {
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger'
 
-import { Car, type CarID, ICarService, type User } from '../../application'
+import {
+  Car,
+  type CarID,
+  ICarService,
+  type User,
+  CarState,
+} from '../../application'
 import { AuthenticationGuard } from '../authentication.guard'
 import { CurrentUser } from '../current-user.decorator'
 
@@ -54,7 +59,8 @@ export class CarController {
   })
   @Get()
   public async getAll(): Promise<CarDTO[]> {
-    throw new NotImplementedException()
+    const cars = await this.carService.getAll()
+    return cars.map(car => CarDTO.fromModel(car))
   }
 
   @ApiOperation({
@@ -73,7 +79,8 @@ export class CarController {
   })
   @Get(':id')
   public async get(@Param('id', ParseIntPipe) _id: CarID): Promise<CarDTO> {
-    throw new NotImplementedException()
+    const car = await this.carService.get(_id)
+    return CarDTO.fromModel(car)
   }
 
   @ApiOperation({
@@ -94,7 +101,11 @@ export class CarController {
     @CurrentUser() _owner: User,
     @Body() _data: CreateCarDTO,
   ): Promise<CarDTO> {
-    throw new NotImplementedException()
+    const ownerId = _owner.id
+    const state = CarState.LOCKED
+    const newData = { ..._data, ownerId, state }
+    const newCar = await this.carService.create(newData)
+    return CarDTO.fromModel(newCar)
   }
 
   @ApiOperation({
@@ -116,6 +127,7 @@ export class CarController {
     @Param('id', ParseIntPipe) _carId: CarID,
     @Body() _data: PatchCarDTO,
   ): Promise<CarDTO> {
-    throw new NotImplementedException()
+    const updatedCar = await this.carService.update(_carId, _data, _user.id)
+    return CarDTO.fromModel(updatedCar)
   }
 }

@@ -10,7 +10,7 @@ import {
   type ICarRepository,
   type UserID,
 } from '../application'
-import { Car } from '../application/car'
+import { Car, CarNotFoundError } from '../application/car'
 
 import { type Transaction } from './database-connection.interface'
 
@@ -48,32 +48,93 @@ function rowToDomain(row: Row): Car {
 @Injectable()
 export class CarRepository implements ICarRepository {
   public async find(_tx: Transaction, _id: CarID): Promise<Car | null> {
-    throw new Error('Not implemented')
+    const maybeRow = await _tx.oneOrNone<Row>(
+      'SELECT * FROM cars WHERE id = $(id)',
+      {
+        id: _id,
+      },
+    )
+    return maybeRow ? rowToDomain(maybeRow) : null
   }
 
   public async get(_tx: Transaction, _id: CarID): Promise<Car> {
-    throw new Error('Not implemented')
+    const car = await this.find(_tx, _id)
+
+    if (!car) {
+      throw new CarNotFoundError(_id)
+    }
+    return car
   }
 
   public async getAll(_tx: Transaction): Promise<Car[]> {
-    throw new Error('Not implemented')
+    const rows = await _tx.any<Row>('SELECT * FROM cars ')
+    return rows.map(row => rowToDomain(row))
   }
 
   public async findByLicensePlate(
     _tx: Transaction,
     _licensePlate: string,
   ): Promise<Car | null> {
-    throw new Error('Not implemented')
+    const row = await _tx.oneOrNone<Row>(
+      `
+    SELECT * FROM cars
+    WHERE license_plate = $(licensePlate)
+    `,
+      {
+        licensePlate: _licensePlate,
+      },
+    )
+
+    return row ? rowToDomain(row) : null
   }
 
   public async update(_tx: Transaction, _car: Car): Promise<Car> {
-    throw new Error('Not implemented')
+    const row = await _tx.oneOrNone<Row>(
+      `UPDATE cars SET
+        car_type_id = $(carTypeId),
+        owner_id = $(ownerId),
+        name = $(name),
+        state = $(state),
+        fuel_type = $(fuelType),
+        horsepower = $(horsepower),
+        license_plate = $(licensePlate),
+        info = $(info)
+      WHERE id = $(id)
+      RETURNING *`,
+      { ..._car },
+    )
+    if (row === null) {
+      throw new CarNotFoundError(_car.id)
+    }
+    return rowToDomain(row)
   }
 
   public async insert(
     _tx: Transaction,
     _car: Except<CarProperties, 'id'>,
   ): Promise<Car> {
-    throw new Error('Not implemented')
+    const row = await _tx.one<Row>(
+      `INSERT INTO cars(
+        car_type_id,
+        owner_id,
+        name,
+        state,
+        fuel_type,
+        horsepower,
+        license_plate,
+        info
+      )VALUES(
+        $(carTypeId),
+        $(ownerId),
+        $(name),
+        $(state),
+        $(fuelType),
+        $(horsepower),
+        $(licensePlate),
+        $(info)
+      )RETURNING *`,
+      { ..._car },
+    )
+    return rowToDomain(row)
   }
 }
