@@ -54,7 +54,8 @@ export class CarController {
   })
   @Get()
   public async getAll(): Promise<CarDTO[]> {
-    throw new NotImplementedException()
+    const cars = await this.carService.getAll()
+    return cars.map(car => CarDTO.fromModel(car))
   }
 
   @ApiOperation({
@@ -73,7 +74,8 @@ export class CarController {
   })
   @Get(':id')
   public async get(@Param('id', ParseIntPipe) _id: CarID): Promise<CarDTO> {
-    throw new NotImplementedException()
+    const car = await this.carService.get(_id)
+    return CarDTO.fromModel(car)
   }
 
   @ApiOperation({
