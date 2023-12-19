@@ -43,8 +43,6 @@ export function configureGlobalEnhancers(
   return app
     .useGlobalPipes(
       new ValidationPipe({
-        transform: true,
-        whitelist: true,
         forbidNonWhitelisted: true,
         forbidUnknownValues: true,
       }),
