@@ -6,6 +6,7 @@ import {
   mockCarTypeService,
   CarTypeServiceMock,
 } from '../../mocks'
+import { AccessDeniedError } from '../access-denied.error'
 import { UserBuilder } from '../user/user.builder'
 
 import { CarBuilder } from './car.builder'
@@ -38,6 +39,14 @@ describe('CarService', () => {
       await expect(
         carService.update(car.id, { horsepower: 555 }, owner.id),
       ).resolves.toEqual(updatedCar)
+    })
+    xit('should Throw an error if you are not the car owner', async () => {
+      const owner = new UserBuilder().build()
+      const car = new CarBuilder().withOwner(owner).withHorsepower(50).build()
+      const notOwner = new UserBuilder().build()
+      await expect(
+        carService.update(car.id, { horsepower: 555 }, notOwner.id),
+      ).rejects.toBeInstanceOf(AccessDeniedError)
     })
   })
 })
