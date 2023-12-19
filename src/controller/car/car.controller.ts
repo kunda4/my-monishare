@@ -78,8 +78,8 @@ export class CarController {
     description: 'No car with the given id was found.',
   })
   @Get(':id')
-  public async get(@Param('id', ParseIntPipe) _id: CarID): Promise<CarDTO> {
-    const car = await this.carService.get(_id)
+  public async get(@Param('id', ParseIntPipe) id: CarID): Promise<CarDTO> {
+    const car = await this.carService.get(id)
     return CarDTO.fromModel(car)
   }
 
@@ -98,12 +98,12 @@ export class CarController {
   })
   @Post()
   public async create(
-    @CurrentUser() _owner: User,
-    @Body() _data: CreateCarDTO,
+    @CurrentUser() owner: User,
+    @Body() data: CreateCarDTO,
   ): Promise<CarDTO> {
-    const ownerId = _owner.id
+    const ownerId = owner.id
     const state = CarState.LOCKED
-    const newData = { ..._data, ownerId, state }
+    const newData = { ...data, ownerId, state }
     const newCar = await this.carService.create(newData)
     return CarDTO.fromModel(newCar)
   }
@@ -123,11 +123,11 @@ export class CarController {
   })
   @Patch(':id')
   public async patch(
-    @CurrentUser() _user: User,
-    @Param('id', ParseIntPipe) _carId: CarID,
-    @Body() _data: PatchCarDTO,
+    @CurrentUser() user: User,
+    @Param('id', ParseIntPipe) carId: CarID,
+    @Body() data: PatchCarDTO,
   ): Promise<CarDTO> {
-    const updatedCar = await this.carService.update(_carId, _data, _user.id)
+    const updatedCar = await this.carService.update(carId, data, user.id)
     return CarDTO.fromModel(updatedCar)
   }
 }

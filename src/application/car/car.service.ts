@@ -36,21 +36,21 @@ export class CarService implements ICarService {
   // Please remove the next line when implementing this file.
   /* eslint-disable @typescript-eslint/require-await */
 
-  public async create(_data: Except<CarProperties, 'id'>): Promise<Car> {
+  public async create(data: Except<CarProperties, 'id'>): Promise<Car> {
     return this.databaseConnection.transactional(async tx => {
-      await this.carTypeService.get(_data.carTypeId)
+      await this.carTypeService.get(data.carTypeId)
 
-      if (typeof _data.licensePlate !== 'string')
+      if (typeof data.licensePlate !== 'string')
         throw new Error('License plate must be string')
 
       const carWithLicensePlate = await this.carRepository.findByLicensePlate(
         tx,
-        _data.licensePlate,
+        data.licensePlate,
       )
       if (carWithLicensePlate)
         throw new ConflictException('License plate already exists')
 
-      return this.carRepository.insert(tx, _data)
+      return this.carRepository.insert(tx, data)
     })
   }
 
@@ -62,45 +62,44 @@ export class CarService implements ICarService {
     return result
   }
 
-  public async get(_id: CarID): Promise<Car> {
-    return this.databaseConnection.transactional(_tx =>
-      this.carRepository.get(_tx, _id),
+  public async get(id: CarID): Promise<Car> {
+    return this.databaseConnection.transactional(tx =>
+      this.carRepository.get(tx, id),
     )
   }
 
   public async update(
-    _carId: CarID,
-    _updates: Partial<Except<CarProperties, 'id'>>,
-    _currentUserId: UserID,
+    carId: CarID,
+    updates: Partial<Except<CarProperties, 'id'>>,
+    currentUserId: UserID,
   ): Promise<Car> {
     return this.databaseConnection.transactional(async tx => {
-      if (_updates.ownerId !== _currentUserId) {
+      if (updates.ownerId !== currentUserId) {
         throw new UnauthorizedException(
           'You are not allowed to update this car',
         )
       }
 
-      if (typeof _updates.carTypeId !== 'number')
+      if (typeof updates.carTypeId !== 'number')
         throw new BadRequestException('Cartype id must be a number')
 
-      await this.carTypeService.get(_updates.carTypeId)
+      await this.carTypeService.get(updates.carTypeId)
 
-      if (typeof _updates.licensePlate !== 'string')
+      if (typeof updates.licensePlate !== 'string')
         throw new Error('License plate must be string')
       const carWithLicensePlate = await this.carRepository.findByLicensePlate(
         tx,
-        _updates.licensePlate,
+        updates.licensePlate,
       )
 
       if (carWithLicensePlate)
         throw new ConflictException('Car with license plate already exists')
 
-      const car = await this.carRepository.get(tx, _carId)
+      const car = await this.carRepository.get(tx, carId)
 
       const updatedCar = new Car({
         ...car,
-        ..._updates,
-        id: _carId,
+        ...updates,
       })
       return this.carRepository.update(tx, updatedCar)
     })
