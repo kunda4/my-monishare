@@ -6,6 +6,7 @@ import {
   ParseIntPipe,
   Patch,
   Post,
+  UnauthorizedException,
   UseGuards,
 } from '@nestjs/common'
 import {
@@ -27,6 +28,7 @@ import {
   ICarService,
   type User,
   CarState,
+  AccessDeniedError,
 } from '../../application'
 import { AuthenticationGuard } from '../authentication.guard'
 import { CurrentUser } from '../current-user.decorator'
@@ -127,7 +129,16 @@ export class CarController {
     @Param('id', ParseIntPipe) carId: CarID,
     @Body() data: PatchCarDTO,
   ): Promise<CarDTO> {
-    const updatedCar = await this.carService.update(carId, data, user.id)
-    return CarDTO.fromModel(updatedCar)
+    try {
+      const updatedCar = await this.carService.update(carId, data, user.id)
+      return CarDTO.fromModel(updatedCar)
+    } catch (error) {
+      if (error instanceof AccessDeniedError) {
+        throw new UnauthorizedException(
+          'You are not allowed to update this car since you are not the owner',
+        )
+      }
+      throw error
+    }
   }
 }
