@@ -31,3 +31,4 @@ lerna-debug.log*
 
 # Local Config & Development
 .env
+*.http

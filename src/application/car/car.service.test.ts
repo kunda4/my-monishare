@@ -31,7 +31,7 @@ describe('CarService', () => {
   })
 
   describe('update', () => {
-    xit('should update a car', async () => {
+    it('should update a car', async () => {
       const owner = new UserBuilder().build()
       const car = new CarBuilder().withOwner(owner).withHorsepower(50).build()
       const updatedCar = CarBuilder.from(car).withHorsepower(555).build()
@@ -40,12 +40,12 @@ describe('CarService', () => {
         carService.update(car.id, { horsepower: 555 }, owner.id),
       ).resolves.toEqual(updatedCar)
     })
-    xit('should Throw an error if you are not the car owner', async () => {
-      const owner = new UserBuilder().build()
+    it('should throw an error if you are not the car owner', async () => {
+      const owner = new UserBuilder().withId(2).build()
       const car = new CarBuilder().withOwner(owner).withHorsepower(50).build()
-      const notOwner = new UserBuilder().build()
+
       await expect(
-        carService.update(car.id, { horsepower: 555 }, notOwner.id),
+        carService.update(car.id, { horsepower: 555 }, owner.id),
       ).rejects.toBeInstanceOf(AccessDeniedError)
     })
   })

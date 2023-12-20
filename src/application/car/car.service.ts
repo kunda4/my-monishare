@@ -69,7 +69,7 @@ export class CarService implements ICarService {
   ): Promise<Car> {
     return this.databaseConnection.transactional(async tx => {
       const car = await this.carRepository.get(tx, carId)
-      if (updates.ownerId !== currentUserId) {
+      if (car.ownerId !== currentUserId) {
         throw new AccessDeniedError(car.name, car.id)
       }
 
