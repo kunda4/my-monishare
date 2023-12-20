@@ -29,9 +29,6 @@ export class CarService implements ICarService {
     this.carTypeService = carTypeService
   }
 
-  // Please remove the next line when implementing this file.
-  /* eslint-disable @typescript-eslint/require-await */
-
   public async create(data: Except<CarProperties, 'id'>): Promise<Car> {
     return this.databaseConnection.transactional(async tx => {
       await this.carTypeService.get(data.carTypeId)

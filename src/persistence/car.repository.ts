@@ -26,8 +26,6 @@ type Row = {
   info: string | null
 }
 
-// Please remove the next line when implementing this file.
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function rowToDomain(row: Row): Car {
   return new Car({
     id: row.id as CarID,
@@ -41,9 +39,6 @@ function rowToDomain(row: Row): Car {
     info: row.info,
   })
 }
-
-// Please remove the next line when implementing this file.
-/* eslint-disable @typescript-eslint/require-await */
 
 @Injectable()
 export class CarRepository implements ICarRepository {
