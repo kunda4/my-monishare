@@ -47,49 +47,49 @@ function rowToDomain(row: Row): Car {
 
 @Injectable()
 export class CarRepository implements ICarRepository {
-  public async find(_tx: Transaction, _id: CarID): Promise<Car | null> {
-    const maybeRow = await _tx.oneOrNone<Row>(
+  public async find(tx: Transaction, id: CarID): Promise<Car | null> {
+    const maybeRow = await tx.oneOrNone<Row>(
       'SELECT * FROM cars WHERE id = $(id)',
       {
-        id: _id,
+        id: id,
       },
     )
     return maybeRow ? rowToDomain(maybeRow) : null
   }
 
-  public async get(_tx: Transaction, _id: CarID): Promise<Car> {
-    const car = await this.find(_tx, _id)
+  public async get(tx: Transaction, id: CarID): Promise<Car> {
+    const car = await this.find(tx, id)
 
     if (!car) {
-      throw new CarNotFoundError(_id)
+      throw new CarNotFoundError(id)
     }
     return car
   }
 
-  public async getAll(_tx: Transaction): Promise<Car[]> {
-    const rows = await _tx.any<Row>('SELECT * FROM cars ')
+  public async getAll(tx: Transaction): Promise<Car[]> {
+    const rows = await tx.any<Row>('SELECT * FROM cars ')
     return rows.map(row => rowToDomain(row))
   }
 
   public async findByLicensePlate(
-    _tx: Transaction,
-    _licensePlate: string,
+    tx: Transaction,
+    licensePlate: string,
   ): Promise<Car | null> {
-    const row = await _tx.oneOrNone<Row>(
+    const row = await tx.oneOrNone<Row>(
       `
     SELECT * FROM cars
     WHERE license_plate = $(licensePlate)
     `,
       {
-        licensePlate: _licensePlate,
+        licensePlate: licensePlate,
       },
     )
 
     return row ? rowToDomain(row) : null
   }
 
-  public async update(_tx: Transaction, _car: Car): Promise<Car> {
-    const row = await _tx.oneOrNone<Row>(
+  public async update(tx: Transaction, car: Car): Promise<Car> {
+    const row = await tx.oneOrNone<Row>(
       `UPDATE cars SET
         car_type_id = $(carTypeId),
         owner_id = $(ownerId),
@@ -101,19 +101,19 @@ export class CarRepository implements ICarRepository {
         info = $(info)
       WHERE id = $(id)
       RETURNING *`,
-      { ..._car },
+      { ...car },
     )
     if (row === null) {
-      throw new CarNotFoundError(_car.id)
+      throw new CarNotFoundError(car.id)
     }
     return rowToDomain(row)
   }
 
   public async insert(
-    _tx: Transaction,
-    _car: Except<CarProperties, 'id'>,
+    tx: Transaction,
+    car: Except<CarProperties, 'id'>,
   ): Promise<Car> {
-    const row = await _tx.one<Row>(
+    const row = await tx.one<Row>(
       `INSERT INTO cars(
         car_type_id,
         owner_id,
@@ -133,7 +133,7 @@ export class CarRepository implements ICarRepository {
         $(licensePlate),
         $(info)
       )RETURNING *`,
-      { ..._car },
+      { ...car },
     )
     return rowToDomain(row)
   }

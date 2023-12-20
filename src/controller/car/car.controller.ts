@@ -1,11 +1,13 @@
 import {
   Body,
+  ConflictException,
   Controller,
   Get,
   Param,
   ParseIntPipe,
   Patch,
   Post,
+  UnauthorizedException,
   UseGuards,
 } from '@nestjs/common'
 import {
@@ -21,12 +23,15 @@ import {
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger'
 
+import { DuplicateLicensePlateError } from 'src/application/car/error'
+
 import {
   Car,
   type CarID,
   ICarService,
   type User,
   CarState,
+  AccessDeniedError,
 } from '../../application'
 import { AuthenticationGuard } from '../authentication.guard'
 import { CurrentUser } from '../current-user.decorator'
@@ -78,8 +83,8 @@ export class CarController {
     description: 'No car with the given id was found.',
   })
   @Get(':id')
-  public async get(@Param('id', ParseIntPipe) _id: CarID): Promise<CarDTO> {
-    const car = await this.carService.get(_id)
+  public async get(@Param('id', ParseIntPipe) id: CarID): Promise<CarDTO> {
+    const car = await this.carService.get(id)
     return CarDTO.fromModel(car)
   }
 
@@ -98,14 +103,23 @@ export class CarController {
   })
   @Post()
   public async create(
-    @CurrentUser() _owner: User,
-    @Body() _data: CreateCarDTO,
+    @CurrentUser() owner: User,
+    @Body() data: CreateCarDTO,
   ): Promise<CarDTO> {
-    const ownerId = _owner.id
-    const state = CarState.LOCKED
-    const newData = { ..._data, ownerId, state }
-    const newCar = await this.carService.create(newData)
-    return CarDTO.fromModel(newCar)
+    try {
+      const ownerId = owner.id
+      const state = CarState.LOCKED
+      const newData = { ...data, ownerId, state }
+      const newCar = await this.carService.create(newData)
+      return CarDTO.fromModel(newCar)
+    } catch (error) {
+      if (error instanceof DuplicateLicensePlateError) {
+        throw new ConflictException(
+          'The Car with that Licence plate already exist',
+        )
+      }
+      throw error
+    }
   }
 
   @ApiOperation({
@@ -123,11 +137,20 @@ export class CarController {
   })
   @Patch(':id')
   public async patch(
-    @CurrentUser() _user: User,
-    @Param('id', ParseIntPipe) _carId: CarID,
-    @Body() _data: PatchCarDTO,
+    @CurrentUser() user: User,
+    @Param('id', ParseIntPipe) carId: CarID,
+    @Body() data: PatchCarDTO,
   ): Promise<CarDTO> {
-    const updatedCar = await this.carService.update(_carId, _data, _user.id)
-    return CarDTO.fromModel(updatedCar)
+    try {
+      const updatedCar = await this.carService.update(carId, data, user.id)
+      return CarDTO.fromModel(updatedCar)
+    } catch (error) {
+      if (error instanceof AccessDeniedError) {
+        throw new UnauthorizedException(
+          'You are not allowed to update this car since you are not the owner',
+        )
+      }
+      throw error
+    }
   }
 }
