@@ -55,9 +55,6 @@ export class CarController {
     this.carService = carService
   }
 
-  // Please remove the next line when implementing this file.
-  /* eslint-disable @typescript-eslint/require-await */
-
   @ApiOperation({
     summary: 'Retrieve all cars.',
   })
