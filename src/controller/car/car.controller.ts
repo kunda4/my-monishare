@@ -110,9 +110,7 @@ export class CarController {
       return CarDTO.fromModel(newCar)
     } catch (error) {
       if (error instanceof DuplicateLicensePlateError) {
-        throw new ConflictException(
-          'The Car with that Licence plate already exist',
-        )
+        throw new ConflictException(error.message)
       }
       throw error
     }
@@ -142,9 +140,10 @@ export class CarController {
       return CarDTO.fromModel(updatedCar)
     } catch (error) {
       if (error instanceof AccessDeniedError) {
-        throw new UnauthorizedException(
-          'You are not allowed to update this car since you are not the owner',
-        )
+        throw new UnauthorizedException(error.message)
+      }
+      if (error instanceof DuplicateLicensePlateError) {
+        throw new ConflictException(error.message)
       }
       throw error
     }
