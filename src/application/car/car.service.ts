@@ -3,6 +3,7 @@ import { type Except } from 'type-fest'
 
 import { IDatabaseConnection } from '../../persistence/database-connection.interface'
 import { AccessDeniedError } from '../access-denied.error'
+import { CarTypeNotFoundError } from '../car-type/car-type-not-found.error'
 import { ICarTypeService } from '../car-type/car-type.service.interface'
 import { type UserID } from '../user'
 
@@ -71,14 +72,14 @@ export class CarService implements ICarService {
       }
 
       if (updates.carTypeId) {
-        await this.carTypeService.get(updates.carTypeId)
+        throw new CarTypeNotFoundError(updates.carTypeId)
       }
       if (updates.licensePlate) {
         const carWithLicensePlate = await this.carRepository.findByLicensePlate(
           tx,
           updates.licensePlate,
         )
-        if (carWithLicensePlate)
+        if (carWithLicensePlate && carWithLicensePlate.id !== car.id)
           throw new DuplicateLicensePlateError(updates.licensePlate)
       }
       const updatedCar = new Car({

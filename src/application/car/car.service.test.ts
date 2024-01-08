@@ -1,3 +1,4 @@
+import { after } from 'node:test'
 import {
   type CarRepositoryMock,
   type DatabaseConnectionMock,
@@ -30,19 +31,25 @@ describe('CarService', () => {
     )
   })
 
+  afterEach(() => jest.clearAllMocks())
+
   describe('update', () => {
     it('should update a car', async () => {
       const owner = new UserBuilder().build()
       const car = new CarBuilder().withOwner(owner).withHorsepower(50).build()
       const updatedCar = CarBuilder.from(car).withHorsepower(555).build()
 
+      carRepositoryMock.get.mockResolvedValue(car)
+      carRepositoryMock.update.mockResolvedValue(updatedCar)
       await expect(
         carService.update(car.id, { horsepower: 555 }, owner.id),
       ).resolves.toEqual(updatedCar)
     })
     it('should throw an error if you are not the car owner', async () => {
       const owner = new UserBuilder().withId(2).build()
-      const car = new CarBuilder().withOwner(owner).withHorsepower(50).build()
+      const car = new CarBuilder().withOwner(55).withHorsepower(60).build()
+
+      carRepositoryMock.get.mockResolvedValue(car)
 
       await expect(
         carService.update(car.id, { horsepower: 555 }, owner.id),
