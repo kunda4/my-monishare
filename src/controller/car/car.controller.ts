@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Body,
   ConflictException,
   Controller,
@@ -30,6 +31,7 @@ import {
   type User,
   CarState,
   AccessDeniedError,
+  CarTypeNotFoundError,
 } from '../../application'
 import { DuplicateLicensePlateError } from '../../application/car/error'
 import { AuthenticationGuard } from '../authentication.guard'
@@ -141,6 +143,9 @@ export class CarController {
     } catch (error) {
       if (error instanceof AccessDeniedError) {
         throw new UnauthorizedException(error.message)
+      }
+      if (error instanceof CarTypeNotFoundError) {
+        throw new BadRequestException('CarType doesnt exist')
       }
       if (error instanceof DuplicateLicensePlateError) {
         throw new ConflictException(error.message)
