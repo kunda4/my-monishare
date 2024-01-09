@@ -10,26 +10,63 @@ import {
 } from 'src/application'
 
 import { validate } from '../../util'
+import { ApiProperty } from '@nestjs/swagger'
 
 export class BookingDTO {
+  @ApiProperty({
+    description: 'The id of the booking.',
+    type: 'integer',
+    minimum: 1,
+    example: 13,
+    readOnly: true,
+  })
   @IsInt()
   @IsPositive()
   public readonly id!: BookingID
 
+  @ApiProperty({
+    description: 'The id of the car.',
+    type: 'integer',
+    minimum: 1,
+    example: 23,
+  })
   @IsInt()
   @IsPositive()
   public readonly carId!: CarID
 
+  @ApiProperty({
+    description: 'The id of the renter.',
+    type: 'integer',
+    minimum: 1,
+    example: 42,
+  })
   @IsInt()
   @IsPositive()
   public readonly renterId!: UserID
 
+  @ApiProperty({
+    description: 'The state of the booking.',
+    enum: BookingState,
+    example: BookingState.PENDING,
+  })
   @IsEnum(BookingState)
   public readonly state!: BookingState
 
+  @ApiProperty({
+    description: 'The start date of the booking.',
+    type: 'string',
+    format: 'date-time',
+    example: '2020-11-01T00:00:00.000Z',
+  })
   @IsDate()
   public readonly startDate!: Date
 
+  @ApiProperty({
+    description: 'The end date of the booking.',
+    type: 'string',
+    format: 'date-time',
+    example: '2020-11-01T00:00:00.000Z',
+  })
   @IsDate()
   public readonly endDate!: Date
 
