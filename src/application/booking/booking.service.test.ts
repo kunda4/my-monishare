@@ -5,7 +5,8 @@ import {
   mockDatabaseConnection,
 } from '../../mocks'
 
-import { Booking } from './booking'
+import { Booking, BookingID } from './booking'
+import { BookingNotFoundError } from './booking-not-found.error'
 import { BookingBuilder } from './booking.builder'
 import { BookingService } from './booking.service'
 
@@ -38,6 +39,18 @@ describe('BookingService', () => {
 
       await expect(bookingService.get(booking.id)).resolves.toBeInstanceOf(
         Booking,
+      )
+    })
+
+    it('should throw not found error if a wrong bookingId is given', async () => {
+      const booking = new BookingBuilder().withId(2).build()
+
+      bookingRepositoryMock.get.mockRejectedValueOnce(
+        new BookingNotFoundError(booking.id),
+      )
+
+      await expect(bookingService.get(booking.id)).rejects.toBeInstanceOf(
+        BookingNotFoundError,
       )
     })
 
