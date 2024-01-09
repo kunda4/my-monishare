@@ -1,3 +1,4 @@
+import { ApiProperty, PickType } from '@nestjs/swagger'
 import { IsInt, IsPositive, IsEnum, IsDate } from 'class-validator'
 import { type Writable } from 'type-fest'
 
@@ -10,7 +11,6 @@ import {
 } from 'src/application'
 
 import { validate } from '../../util'
-import { ApiProperty } from '@nestjs/swagger'
 
 export class BookingDTO {
   @ApiProperty({
@@ -94,3 +94,15 @@ export class BookingDTO {
     return BookingDTO.create(booking)
   }
 }
+
+export class CreateBookingDTO extends PickType(BookingDTO, [
+  'carId',
+  'startDate',
+  'endDate',
+] as const) {}
+
+export class PatchBookingDTO extends PickType(BookingDTO, [
+  'state',
+  'startDate',
+  'endDate',
+] as const) {}
