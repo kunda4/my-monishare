@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common'
 import { IBookingRepository } from './booking.repository.interface'
-import { IDatabaseConnection } from 'src/persistence'
+import { IDatabaseConnection } from '../../persistence'
 import { Booking, BookingID } from './booking'
 import { IBookingService } from './booking.service.interface'
 
