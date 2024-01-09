@@ -5,7 +5,7 @@ import {
   mockDatabaseConnection,
 } from '../../mocks'
 
-import { Booking, BookingID } from './booking'
+import { Booking } from './booking'
 import { BookingNotFoundError } from './booking-not-found.error'
 import { BookingBuilder } from './booking.builder'
 import { BookingService } from './booking.service'

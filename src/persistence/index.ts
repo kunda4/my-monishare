@@ -5,4 +5,3 @@ export * from './database-connection.config'
 export * from './database-connection.interface'
 export * from './user.repository'
 export * from './booking.repository'
-

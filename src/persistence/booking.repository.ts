@@ -1,15 +1,12 @@
 import { Injectable } from '@nestjs/common'
-import { type Except } from 'type-fest'
 
 import {
   type BookingID,
-  type BookingProperties,
   type BookingState,
   type IBookingRepository,
   type CarID,
   type UserID,
 } from '../application'
-
 import { Booking, BookingNotFoundError } from '../application/booking'
 
 import { type Transaction } from './database-connection.interface'
