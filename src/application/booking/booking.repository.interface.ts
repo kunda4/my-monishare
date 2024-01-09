@@ -9,10 +9,10 @@ export abstract class IBookingRepository {
 
   public abstract getAll(tx: Transaction): Promise<Booking[]>
 
-  public abstract update(tx: Transaction, booking: Booking): Promise<Booking>
+  // public abstract update(tx: Transaction, booking: Booking): Promise<Booking>
 
-  public abstract insert(
-    tx: Transaction,
-    car: Except<BookingProperties, 'id'>,
-  ): Promise<Booking>
+  // public abstract insert(
+  //   tx: Transaction,
+  //   car: Except<BookingProperties, 'id'>,
+  // ): Promise<Booking>
 }
