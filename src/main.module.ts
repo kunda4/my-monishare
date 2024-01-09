@@ -1,9 +1,7 @@
 import { Module } from '@nestjs/common'
 import { ConfigModule as NestjsConfigModule } from '@nestjs/config'
 
-import { ControllerModule, UtilityModule } from './module'
-import { BookingService } from './application/booking/booking.service';
-import { BookingController } from './controller/booking/booking.controller';
+import { ControllerModule, ServiceModule, UtilityModule } from './module'
 
 @Module({
   imports: [
@@ -11,7 +9,6 @@ import { BookingController } from './controller/booking/booking.controller';
     UtilityModule,
     ControllerModule,
   ],
-  providers: [BookingService],
-  controllers: [BookingController],
+  providers: [ServiceModule],
 })
 export class MainModule {}

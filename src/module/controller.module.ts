@@ -8,6 +8,7 @@ import {
   CarTypeController,
   UserController,
 } from '../controller'
+import { BookingController } from '../controller/booking/booking.controller'
 
 import { ConfigModule } from './config.module'
 import { ServiceModule } from './service.module'
@@ -33,6 +34,7 @@ import { ServiceModule } from './service.module'
     CarController,
     CarTypeController,
     UserController,
+    BookingController,
   ],
 })
 export class ControllerModule {}

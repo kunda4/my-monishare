@@ -5,11 +5,13 @@ import {
   CarService,
   CarTypeService,
   IAuthenticationService,
+  IBookingService,
   ICarService,
   ICarTypeService,
   IUserService,
   UserService,
 } from '../application'
+import { BookingService } from '../application/booking/booking.service'
 
 import { DatabaseModule } from './database.module'
 import { RepositoryModule } from './repository.module'
@@ -33,7 +35,17 @@ import { RepositoryModule } from './repository.module'
       provide: IUserService,
       useClass: UserService,
     },
+    {
+      provide: IBookingService,
+      useClass: BookingService,
+    },
   ],
-  exports: [IAuthenticationService, ICarService, ICarTypeService, IUserService],
+  exports: [
+    IAuthenticationService,
+    ICarService,
+    ICarTypeService,
+    IUserService,
+    IBookingService,
+  ],
 })
 export class ServiceModule {}
