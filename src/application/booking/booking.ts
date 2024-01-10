@@ -1,5 +1,5 @@
 import { IsDate, IsEnum, IsInt, IsPositive } from 'class-validator'
-import dayjs from 'dayjs'
+import dayjs, { isDayjs } from 'dayjs'
 import { type Opaque } from 'type-fest'
 
 import { validate } from '../../util'

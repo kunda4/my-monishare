@@ -67,14 +67,14 @@ export class BookingBuilder {
     return this
   }
 
-  public withStartDate(data: dayjs.Dayjs): this {
-    this.properties.startDate = data
+  public withStartDate(startDate: dayjs.Dayjs): this {
+    this.properties.startDate = startDate
 
     return this
   }
 
-  public withEndDate(data: dayjs.Dayjs): this {
-    this.properties.endDate = data
+  public withEndDate(endDate: dayjs.Dayjs): this {
+    this.properties.endDate = endDate
 
     return this
   }

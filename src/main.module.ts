@@ -9,6 +9,5 @@ import { ControllerModule, ServiceModule, UtilityModule } from './module'
     UtilityModule,
     ControllerModule,
   ],
-  providers: [ServiceModule],
 })
 export class MainModule {}
