@@ -65,4 +65,10 @@ describe('BookingService', () => {
       )
     })
   })
+
+  describe('create and update', () => {
+    it('should create a booking', async () => {})
+
+    it('should update a booking', async () => {})
+  })
 })
