@@ -7,7 +7,7 @@ import {
   ParseIntPipe,
   UseGuards,
   Post,
-  BadRequestException,
+  Patch,
 } from '@nestjs/common'
 import {
   ApiBadRequestResponse,
@@ -31,7 +31,7 @@ import {
 import { AuthenticationGuard } from '../authentication.guard'
 import { CurrentUser } from '../current-user.decorator'
 
-import { BookingDTO, CreateBookingDTO } from './booking.dto'
+import { BookingDTO, CreateBookingDTO, PatchBookingDTO } from './booking.dto'
 
 @ApiTags('Booking')
 @ApiBearerAuth()
@@ -93,12 +93,6 @@ export class BookingController {
     const state = BookingState.PENDING
     const renterId = renter.id
 
-    if (!dayjs(data.startDate).isValid() || !dayjs(data.endDate).isValid()) {
-      throw new BadRequestException(
-        'Invalid date format. Dates must be in ISO 8601 format.',
-      )
-    }
-
     const newData = { ...data, renterId, state }
 
     const newBooking = await this.bookingService.insert(newData)
@@ -109,5 +103,21 @@ export class BookingController {
     }
 
     return BookingDTO.fromModel(newUpdatedBooking)
+  }
+
+  @Patch(':id')
+  public async update(
+    @Param('id', ParseIntPipe) id: BookingID,
+    @Body() data: PatchBookingDTO,
+  ): Promise<BookingDTO> {
+    try {
+      const booking = await this.bookingService.update(id, data)
+      return BookingDTO.fromModel(booking)
+    } catch (error) {
+      if (error instanceof BookingNotFoundError)
+        throw new NotFoundException('Booking not found')
+
+      throw error
+    }
   }
 }

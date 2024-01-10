@@ -4,9 +4,9 @@ import { type Except } from 'type-fest'
 import { IDatabaseConnection } from '../../persistence'
 
 import { Booking, BookingID, BookingProperties } from './booking'
+import { BookingNotFoundError } from './booking-not-found.error'
 import { IBookingRepository } from './booking.repository.interface'
 import { IBookingService } from './booking.service.interface'
-import { BookingNotFoundError } from './booking-not-found.error'
 
 @Injectable()
 export class BookingService implements IBookingService {
@@ -42,13 +42,11 @@ export class BookingService implements IBookingService {
   public async update(
     bookingId: BookingID,
     updateBooking: Partial<Except<BookingProperties, 'id'>>,
-
   ): Promise<Booking> {
     return this.databaseConnection.transactional(async tx => {
-
       const booking = await this.bookingRepository.get(tx, bookingId)
-      if(!booking){
-        throw new BookingNotFoundError('booking id does not exist')
+      if (!booking) {
+        throw new BookingNotFoundError(bookingId)
       }
       const updatedBooking = new Booking({
         ...booking,
