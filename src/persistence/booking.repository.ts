@@ -21,8 +21,8 @@ type Row = {
   car_id: number
   renter_id: number
   state: string
-  start_date: Date
-  end_date: Date
+  start_date: string
+  end_date: string
 }
 
 function rowToDomain(row: Row): Booking {

@@ -33,7 +33,7 @@ export class BookingService implements IBookingService {
     })
   }
 
-  public async create(data: Except<BookingProperties, 'id'>): Promise<Booking> {
+  public async insert(data: Except<BookingProperties, 'id'>): Promise<Booking> {
     return this.databaseConnection.transactional(tx => {
       return this.bookingRepository.insert(tx, data)
     })

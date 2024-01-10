@@ -1,5 +1,5 @@
 import { ApiProperty, PickType } from '@nestjs/swagger'
-import { IsInt, IsPositive, IsEnum, IsDate } from 'class-validator'
+import { IsInt, IsPositive, IsEnum, IsDateString } from 'class-validator'
 import { type Writable } from 'type-fest'
 
 import {
@@ -58,8 +58,8 @@ export class BookingDTO {
     format: 'date-time',
     example: '2020-11-01T00:00:00.000Z',
   })
-  @IsDate()
-  public readonly startDate!: Date
+  @IsDateString()
+  public readonly startDate!: string
 
   @ApiProperty({
     description: 'The end date of the booking.',
@@ -67,16 +67,16 @@ export class BookingDTO {
     format: 'date-time',
     example: '2020-11-01T00:00:00.000Z',
   })
-  @IsDate()
-  public readonly endDate!: Date
+  @IsDateString()
+  public readonly endDate!: string
 
   public static create(data: {
     id: BookingID
     carId: CarID
     renterId: UserID
     state: BookingState
-    startDate: Date
-    endDate: Date
+    startDate: string
+    endDate: string
   }): BookingDTO {
     const instance = new BookingDTO() as Writable<BookingDTO>
 

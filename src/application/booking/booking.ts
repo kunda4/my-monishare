@@ -20,8 +20,8 @@ export type BookingProperties = {
   carId: CarID
   state: BookingState
   renterId: UserID
-  startDate: Date
-  endDate: Date
+  startDate: string
+  endDate: string
 }
 
 export class Booking {
@@ -41,10 +41,10 @@ export class Booking {
   public readonly state: BookingState
 
   @IsDate()
-  public readonly startDate: Date
+  public readonly startDate: string
 
   @IsDate()
-  public readonly endDate: Date
+  public readonly endDate: string
 
   public constructor(data: BookingProperties) {
     this.id = data.id

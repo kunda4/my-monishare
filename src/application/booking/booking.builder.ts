@@ -16,8 +16,8 @@ export class BookingBuilder {
     id: 10 as BookingID,
     renterId: 2 as UserID,
     carId: 1 as CarID,
-    startDate: new Date('2024-02-08T14:07:27.828Z'),
-    endDate: new Date('2024-06-09T07:20:56.959Z'),
+    startDate: '2024-02-08T14:07:27.828Z',
+    endDate: '2024-06-09T07:20:56.959Z',
     state: BookingState.PENDING,
   }
 
@@ -66,13 +66,13 @@ export class BookingBuilder {
     return this
   }
 
-  public withStartDate(data: Date): this {
+  public withStartDate(data: string): this {
     this.properties.startDate = data
 
     return this
   }
 
-  public withEndDate(data: Date): this {
+  public withEndDate(data: string): this {
     this.properties.endDate = data
 
     return this
