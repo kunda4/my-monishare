@@ -61,8 +61,8 @@ export class BookingBuilder {
     return this
   }
 
-  public withState(data: BookingState): this {
-    this.properties.state = data
+  public withState(state: BookingState): this {
+    this.properties.state = state
 
     return this
   }
