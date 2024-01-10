@@ -6,6 +6,7 @@ import { IDatabaseConnection } from '../../persistence'
 import { Booking, BookingID, BookingProperties } from './booking'
 import { IBookingRepository } from './booking.repository.interface'
 import { IBookingService } from './booking.service.interface'
+import { BookingNotFoundError } from './booking-not-found.error'
 
 @Injectable()
 export class BookingService implements IBookingService {
@@ -36,6 +37,24 @@ export class BookingService implements IBookingService {
   public async insert(data: Except<BookingProperties, 'id'>): Promise<Booking> {
     return this.databaseConnection.transactional(tx => {
       return this.bookingRepository.insert(tx, data)
+    })
+  }
+  public async update(
+    bookingId: BookingID,
+    updateBooking: Partial<Except<BookingProperties, 'id'>>,
+
+  ): Promise<Booking> {
+    return this.databaseConnection.transactional(async tx => {
+
+      const booking = await this.bookingRepository.get(tx, bookingId)
+      if(!booking){
+        throw new BookingNotFoundError('booking id does not exist')
+      }
+      const updatedBooking = new Booking({
+        ...booking,
+        ...updateBooking,
+      })
+      return this.bookingRepository.update(tx, updatedBooking)
     })
   }
 }

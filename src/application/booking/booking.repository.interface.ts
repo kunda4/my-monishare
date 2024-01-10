@@ -13,4 +13,6 @@ export abstract class IBookingRepository {
     tx: Transaction,
     booking: Except<BookingProperties, 'id'>,
   ): Promise<Booking>
+
+  public abstract update(tx: Transaction, booking: Booking): Promise<Booking>
 }
