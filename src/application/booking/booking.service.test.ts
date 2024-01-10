@@ -67,7 +67,15 @@ describe('BookingService', () => {
   })
 
   describe('create and update', () => {
-    it('should create a booking', async () => {})
+    it('should create a booking', async () => {
+      const booking = new BookingBuilder().withId(1).build()
+
+      bookingRepositoryMock.insert.mockResolvedValueOnce(booking)
+
+      await expect(bookingService.insert(booking)).resolves.toBeInstanceOf(
+        Booking,
+      )
+    })
 
     it('should update a booking', async () => {})
   })
