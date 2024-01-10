@@ -13,6 +13,7 @@ import {
 import {
   ApiBadRequestResponse,
   ApiBearerAuth,
+  ApiCreatedResponse,
   ApiInternalServerErrorResponse,
   ApiNotFoundResponse,
   ApiOkResponse,
@@ -33,7 +34,6 @@ import { AuthenticationGuard } from '../authentication.guard'
 import { CurrentUser } from '../current-user.decorator'
 
 import { BookingDTO, CreateBookingDTO, PatchBookingDTO } from './booking.dto'
-import { start } from 'repl'
 
 @ApiTags('Booking')
 @ApiBearerAuth()
@@ -87,6 +87,19 @@ export class BookingController {
     }
   }
 
+  @ApiOperation({
+    summary: 'Create a new booking.',
+  })
+  @ApiCreatedResponse({
+    description: 'A new booking was created.',
+  })
+  @ApiBadRequestResponse({
+    description:
+      'The request was malformed, e.g. missing or invalid parameter or property in the request body.',
+  })
+  @ApiInternalServerErrorResponse({
+    description: 'Internal sever error',
+  })
   @Post()
   public async insert(
     @Body() data: CreateBookingDTO,
@@ -101,15 +114,28 @@ export class BookingController {
       )
     }
 
-    const startDate = dayjs(data.startDate)
-    const endDate = dayjs(data.endDate)
-
-    const newData = { ...data, renterId, state, startDate, endDate }
+    const newData = { ...data, renterId, state }
 
     const newBooking = await this.bookingService.insert(newData)
     return BookingDTO.fromModel(newBooking)
   }
 
+  @ApiOperation({
+    summary: 'Update an existing booking.',
+  })
+  @ApiOkResponse({
+    description: 'The booking was updated',
+  })
+  @ApiNotFoundResponse({
+    description: 'No booking with the given id was found.',
+  })
+  @ApiBadRequestResponse({
+    description:
+      'The request was malformed, e.g. missing or invalid parameter or property in the request body.',
+  })
+  @ApiInternalServerErrorResponse({
+    description: 'Internal server error',
+  })
   @Patch(':id')
   public async update(
     @Param('id', ParseIntPipe) id: BookingID,
