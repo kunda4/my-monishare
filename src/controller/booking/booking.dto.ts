@@ -59,11 +59,11 @@ export class BookingDTO {
     format: 'date-time',
     example: '2020-11-01T00:00:00.000Z',
   })
-  public readonly _startDate!: dayjs.Dayjs
+  public readonly startDate!: dayjs.Dayjs
 
   @IsDateString()
-  public get startDate(): string {
-    return this._startDate.toISOString()
+  public get _startDate(): string {
+    return this.startDate.toISOString()
   }
 
   @ApiProperty({
@@ -72,11 +72,11 @@ export class BookingDTO {
     format: 'date-time',
     example: '2020-11-01T00:00:00.000Z',
   })
-  public readonly _endDate!: dayjs.Dayjs
+  public readonly endDate!: dayjs.Dayjs
 
   @IsDateString()
-  public get endDate(): string {
-    return this._startDate.toISOString()
+  public get _endDate(): string {
+    return this.startDate.toISOString()
   }
 
   public static create(data: {
@@ -93,8 +93,8 @@ export class BookingDTO {
     instance.carId = data.carId
     instance.renterId = data.renterId
     instance.state = data.state
-    instance._startDate = data.startDate
-    instance._endDate = data.endDate
+    instance.startDate = data.startDate
+    instance.endDate = data.endDate
 
     return validate(instance)
   }
