@@ -85,4 +85,23 @@ export class BookingRepository implements IBookingRepository {
     )
     return rowToDomain(row)
   }
+
+  public async update(tx: Transaction, booking: Booking): Promise<Booking> {
+    const row = await tx.oneOrNone<Row>(
+      `UPDATE bookings SET
+      car_id = $(carId) ,
+      state =  $(state),
+      renter_id = $(renterId),
+      start_date  = $(startDate),
+      end_date = $(endDate),
+      WHERE id = $(id)
+      RETURNING *
+      `,
+      { ...booking },
+    )
+    if (row === null) {
+      throw new BookingNotFoundError(booking.id)
+    }
+    return rowToDomain(row)
+  }
 }
