@@ -107,12 +107,6 @@ export class BookingController {
     const newData = { ...data, renterId, state, startDate, endDate }
 
     const newBooking = await this.bookingService.insert(newData)
-    // const newUpdatedBooking = {
-    //   ...newBooking,
-    //   startDate: dayjs(newBooking.startDate).toISOString(),
-    //   endDate: dayjs(newBooking.endDate).toISOString(),
-    // }
-
     return BookingDTO.fromModel(newBooking)
   }
 
