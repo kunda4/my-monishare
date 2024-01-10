@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common'
+import { type Except } from 'type-fest'
 
 import {
   type BookingID,
@@ -7,7 +8,7 @@ import {
   type CarID,
   type UserID,
 } from '../application'
-import { Booking, BookingNotFoundError } from '../application/booking'
+import { Booking, BookingNotFoundError, BookingProperties } from '../application/booking'
 
 import { type Transaction } from './database-connection.interface'
 
@@ -56,5 +57,28 @@ export class BookingRepository implements IBookingRepository {
   public async getAll(tx: Transaction): Promise<Booking[]> {
     const rows = await tx.manyOrNone<Row>('SELECT * FROM bookings')
     return rows.map(row => rowToDomain(row))
+  }
+
+  public async insert(
+    tx: Transaction,
+    booking: Except<BookingProperties, 'id'>,
+  ): Promise<Booking>{
+    const row = await tx.one<Row>(
+      `INSERT INTO bookings(
+        car_id,
+        state,
+        renter_id,
+        start_date,
+        end_date
+      )VALUES(
+        $(carId),
+        $(state),
+        $(renterId),
+        $(startDate),
+        $(endDate)
+      )RETURNING *`,
+      {...booking},
+    )
+    return rowToDomain(row)
   }
 }
