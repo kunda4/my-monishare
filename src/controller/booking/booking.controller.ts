@@ -1,10 +1,12 @@
 import {
+  Body,
   Controller,
   Get,
   NotFoundException,
   Param,
   ParseIntPipe,
   UseGuards,
+  Post,
 } from '@nestjs/common'
 import {
   ApiBadRequestResponse,
@@ -21,10 +23,13 @@ import {
   type BookingID,
   IBookingService,
   BookingNotFoundError,
+  BookingState,
+  User,
 } from '../../application'
 import { AuthenticationGuard } from '../authentication.guard'
+import { CurrentUser } from '../current-user.decorator'
 
-import { BookingDTO } from './booking.dto'
+import { BookingDTO, CreateBookingDTO } from './booking.dto'
 
 @ApiTags('Booking')
 @ApiBearerAuth()
@@ -76,5 +81,20 @@ export class BookingController {
 
       throw error
     }
+  }
+
+  @Post()
+  public async create(
+    @Body() data: CreateBookingDTO,
+    @CurrentUser() renter: User,
+  ): Promise<BookingDTO> {
+    const state = BookingState.PENDING
+    const renterId = renter.id
+
+    const newData = { ...data, renterId, state }
+
+    const newBooking = await this.bookingService.create(newData)
+
+    return BookingDTO.fromModel(newBooking)
   }
 }
