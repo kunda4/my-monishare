@@ -8,7 +8,11 @@ import {
   type CarID,
   type UserID,
 } from '../application'
-import { Booking, BookingNotFoundError, BookingProperties } from '../application/booking'
+import {
+  Booking,
+  BookingNotFoundError,
+  BookingProperties,
+} from '../application/booking'
 
 import { type Transaction } from './database-connection.interface'
 
@@ -62,7 +66,7 @@ export class BookingRepository implements IBookingRepository {
   public async insert(
     tx: Transaction,
     booking: Except<BookingProperties, 'id'>,
-  ): Promise<Booking>{
+  ): Promise<Booking> {
     const row = await tx.one<Row>(
       `INSERT INTO bookings(
         car_id,
@@ -77,7 +81,7 @@ export class BookingRepository implements IBookingRepository {
         $(startDate),
         $(endDate)
       )RETURNING *`,
-      {...booking},
+      { ...booking },
     )
     return rowToDomain(row)
   }
