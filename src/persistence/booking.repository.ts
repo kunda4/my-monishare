@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common'
+import dayjs from 'dayjs'
 import { type Except } from 'type-fest'
 
 import {
@@ -21,8 +22,8 @@ type Row = {
   car_id: number
   renter_id: number
   state: string
-  start_date: string
-  end_date: string
+  start_date: dayjs.Dayjs
+  end_date: dayjs.Dayjs
 }
 
 function rowToDomain(row: Row): Booking {
@@ -93,7 +94,7 @@ export class BookingRepository implements IBookingRepository {
       state =  $(state),
       renter_id = $(renterId),
       start_date  = $(startDate),
-      end_date = $(endDate),
+      end_date = $(endDate)
       WHERE id = $(id)
       RETURNING *
       `,

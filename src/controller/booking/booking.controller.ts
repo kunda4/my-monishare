@@ -33,6 +33,7 @@ import { AuthenticationGuard } from '../authentication.guard'
 import { CurrentUser } from '../current-user.decorator'
 
 import { BookingDTO, CreateBookingDTO, PatchBookingDTO } from './booking.dto'
+import { start } from 'repl'
 
 @ApiTags('Booking')
 @ApiBearerAuth()
@@ -95,18 +96,24 @@ export class BookingController {
     const renterId = renter.id
 
     if (!dayjs(data.startDate).isValid() || !dayjs(data.endDate).isValid()) {
-      throw new BadRequestException('Invalid date format it should be ISO 8601')
+      throw new BadRequestException(
+        'Invalid date format. Dates must be in ISO 8601 format.',
+      )
     }
-    const newData = { ...data, renterId, state }
+
+    const startDate = dayjs(data.startDate)
+    const endDate = dayjs(data.endDate)
+
+    const newData = { ...data, renterId, state, startDate, endDate }
 
     const newBooking = await this.bookingService.insert(newData)
-    const newUpdatedBooking = {
-      ...newBooking,
-      startDate: dayjs(newBooking.startDate).toISOString(),
-      endDate: dayjs(newBooking.endDate).toISOString(),
-    }
+    // const newUpdatedBooking = {
+    //   ...newBooking,
+    //   startDate: dayjs(newBooking.startDate).toISOString(),
+    //   endDate: dayjs(newBooking.endDate).toISOString(),
+    // }
 
-    return BookingDTO.fromModel(newUpdatedBooking)
+    return BookingDTO.fromModel(newBooking)
   }
 
   @Patch(':id')

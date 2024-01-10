@@ -1,5 +1,6 @@
 import { ApiProperty, PickType } from '@nestjs/swagger'
 import { IsInt, IsPositive, IsEnum, IsDateString } from 'class-validator'
+import dayjs from 'dayjs'
 import { type Writable } from 'type-fest'
 
 import {
@@ -58,8 +59,12 @@ export class BookingDTO {
     format: 'date-time',
     example: '2020-11-01T00:00:00.000Z',
   })
+  public readonly _startDate!: dayjs.Dayjs
+
   @IsDateString()
-  public readonly startDate!: string
+  public get startDate(): string {
+    return this._startDate.toISOString()
+  }
 
   @ApiProperty({
     description: 'The end date of the booking.',
@@ -67,16 +72,20 @@ export class BookingDTO {
     format: 'date-time',
     example: '2020-11-01T00:00:00.000Z',
   })
+  public readonly _endDate!: dayjs.Dayjs
+
   @IsDateString()
-  public readonly endDate!: string
+  public get endDate(): string {
+    return this._startDate.toISOString()
+  }
 
   public static create(data: {
     id: BookingID
     carId: CarID
     renterId: UserID
     state: BookingState
-    startDate: string
-    endDate: string
+    startDate: dayjs.Dayjs
+    endDate: dayjs.Dayjs
   }): BookingDTO {
     const instance = new BookingDTO() as Writable<BookingDTO>
 
@@ -84,8 +93,8 @@ export class BookingDTO {
     instance.carId = data.carId
     instance.renterId = data.renterId
     instance.state = data.state
-    instance.startDate = data.startDate
-    instance.endDate = data.endDate
+    instance._startDate = data.startDate
+    instance._endDate = data.endDate
 
     return validate(instance)
   }
@@ -101,8 +110,4 @@ export class CreateBookingDTO extends PickType(BookingDTO, [
   'endDate',
 ] as const) {}
 
-export class PatchBookingDTO extends PickType(BookingDTO, [
-  'state',
-  'startDate',
-  'endDate',
-] as const) {}
+export class PatchBookingDTO extends PickType(BookingDTO, ['state'] as const) {}
