@@ -8,6 +8,7 @@ import {
   UseGuards,
   Post,
   Patch,
+  BadRequestException,
 } from '@nestjs/common'
 import {
   ApiBadRequestResponse,
@@ -93,6 +94,9 @@ export class BookingController {
     const state = BookingState.PENDING
     const renterId = renter.id
 
+    if (!dayjs(data.startDate).isValid() || !dayjs(data.endDate).isValid()) {
+      throw new BadRequestException('Invalid date format it should be ISO 8601')
+    }
     const newData = { ...data, renterId, state }
 
     const newBooking = await this.bookingService.insert(newData)
