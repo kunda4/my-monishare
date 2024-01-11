@@ -4,7 +4,9 @@ export type BookingServiceMock = jest.Mocked<IBookingService>
 
 export function mockBookingService(): BookingServiceMock {
   return {
-    getAll: jest.fn(),
     get: jest.fn(),
+    getAll: jest.fn(),
+    create: jest.fn(),
+    update: jest.fn(),
   }
 }

@@ -1,4 +1,6 @@
 import { Injectable } from '@nestjs/common'
+import { type Dayjs } from 'dayjs'
+import { type Except } from 'type-fest'
 
 import {
   type BookingID,
@@ -7,7 +9,11 @@ import {
   type CarID,
   type UserID,
 } from '../application'
-import { Booking, BookingNotFoundError } from '../application/booking'
+import {
+  Booking,
+  BookingNotFoundError,
+  BookingProperties,
+} from '../application/booking'
 
 import { type Transaction } from './database-connection.interface'
 
@@ -16,8 +22,8 @@ type Row = {
   car_id: number
   renter_id: number
   state: string
-  start_date: Date
-  end_date: Date
+  start_date: Dayjs
+  end_date: Dayjs
 }
 
 function rowToDomain(row: Row): Booking {
@@ -43,18 +49,54 @@ export class BookingRepository implements IBookingRepository {
     return maybeRow ? rowToDomain(maybeRow) : null
   }
 
-  public async get(tx: Transaction, id: BookingID): Promise<Booking> {
-    const booking = await this.find(tx, id)
-
-    if (!booking) {
-      throw new BookingNotFoundError(id)
-    }
-
-    return booking
+  public async get(tx: Transaction, id: BookingID): Promise<Booking | null> {
+    return await this.find(tx, id)
   }
 
   public async getAll(tx: Transaction): Promise<Booking[]> {
     const rows = await tx.manyOrNone<Row>('SELECT * FROM bookings')
     return rows.map(row => rowToDomain(row))
+  }
+
+  public async create(
+    tx: Transaction,
+    booking: Except<BookingProperties, 'id'>,
+  ): Promise<Booking> {
+    const row = await tx.one<Row>(
+      `INSERT INTO bookings(
+        car_id,
+        state,
+        renter_id,
+        start_date,
+        end_date
+      )VALUES(
+        $(carId),
+        $(state),
+        $(renterId),
+        $(startDate),
+        $(endDate)
+      )RETURNING *`,
+      { ...booking },
+    )
+    return rowToDomain(row)
+  }
+
+  public async update(tx: Transaction, booking: Booking): Promise<Booking> {
+    const row = await tx.oneOrNone<Row>(
+      `UPDATE bookings SET
+      car_id = $(carId) ,
+      state =  $(state),
+      renter_id = $(renterId),
+      start_date  = $(startDate),
+      end_date = $(endDate)
+      WHERE id = $(id)
+      RETURNING *
+      `,
+      { ...booking },
+    )
+    if (row === null) {
+      throw new BookingNotFoundError(booking.id)
+    }
+    return rowToDomain(row)
   }
 }

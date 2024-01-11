@@ -1,14 +1,18 @@
 import {
+  Body,
   Controller,
   Get,
   NotFoundException,
   Param,
   ParseIntPipe,
   UseGuards,
+  Post,
+  Patch,
 } from '@nestjs/common'
 import {
   ApiBadRequestResponse,
   ApiBearerAuth,
+  ApiCreatedResponse,
   ApiInternalServerErrorResponse,
   ApiNotFoundResponse,
   ApiOkResponse,
@@ -21,10 +25,13 @@ import {
   type BookingID,
   IBookingService,
   BookingNotFoundError,
+  BookingState,
+  User,
 } from '../../application'
 import { AuthenticationGuard } from '../authentication.guard'
+import { CurrentUser } from '../current-user.decorator'
 
-import { BookingDTO } from './booking.dto'
+import { BookingDTO, CreateBookingDTO, PatchBookingDTO } from './booking.dto'
 
 @ApiTags('Booking')
 @ApiBearerAuth()
@@ -69,6 +76,65 @@ export class BookingController {
   ): Promise<BookingDTO> {
     try {
       const booking = await this.bookingService.get(id)
+      return BookingDTO.fromModel(booking)
+    } catch (error) {
+      if (error instanceof BookingNotFoundError)
+        throw new NotFoundException('Booking not found')
+
+      throw error
+    }
+  }
+
+  @ApiOperation({
+    summary: 'Create a new booking.',
+  })
+  @ApiCreatedResponse({
+    description: 'A new booking was created.',
+  })
+  @ApiBadRequestResponse({
+    description:
+      'The request was malformed, e.g. missing or invalid parameter or property in the request body.',
+  })
+  @ApiInternalServerErrorResponse({
+    description: 'Internal sever error',
+  })
+  @Post()
+  public async create(
+    @Body() data: CreateBookingDTO,
+    @CurrentUser() renter: User,
+  ): Promise<BookingDTO> {
+    const state = BookingState.PENDING
+    const renterId = renter.id
+
+    const newData = { ...data, renterId, state }
+
+    const newBooking = await this.bookingService.create(newData)
+    return BookingDTO.fromModel(newBooking)
+  }
+
+  @ApiOperation({
+    summary: 'Update an existing booking.',
+  })
+  @ApiOkResponse({
+    description: 'The booking was updated',
+  })
+  @ApiNotFoundResponse({
+    description: 'No booking with the given id was found.',
+  })
+  @ApiBadRequestResponse({
+    description:
+      'The request was malformed, e.g. missing or invalid parameter or property in the request body.',
+  })
+  @ApiInternalServerErrorResponse({
+    description: 'Internal server error',
+  })
+  @Patch(':id')
+  public async update(
+    @Param('id', ParseIntPipe) id: BookingID,
+    @Body() data: PatchBookingDTO,
+  ): Promise<BookingDTO> {
+    try {
+      const booking = await this.bookingService.update(id, data)
       return BookingDTO.fromModel(booking)
     } catch (error) {
       if (error instanceof BookingNotFoundError)

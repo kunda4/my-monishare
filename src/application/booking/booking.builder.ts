@@ -1,3 +1,4 @@
+import dayjs, { type Dayjs } from 'dayjs'
 import { type Except } from 'type-fest'
 
 import { Booking, type BookingID, type BookingProperties } from '../booking'
@@ -16,8 +17,8 @@ export class BookingBuilder {
     id: 10 as BookingID,
     renterId: 2 as UserID,
     carId: 1 as CarID,
-    startDate: new Date('2024-02-08T14:07:27.828Z'),
-    endDate: new Date('2024-06-09T07:20:56.959Z'),
+    startDate: dayjs('2024-02-08T14:07:27.828Z'),
+    endDate: dayjs('2024-06-09T07:20:56.959Z'),
     state: BookingState.PENDING,
   }
 
@@ -60,20 +61,20 @@ export class BookingBuilder {
     return this
   }
 
-  public withState(data: BookingState): this {
-    this.properties.state = data
+  public withState(state: BookingState): this {
+    this.properties.state = state
 
     return this
   }
 
-  public withStartDate(data: Date): this {
-    this.properties.startDate = data
+  public withStartDate(startDate: Dayjs): this {
+    this.properties.startDate = startDate
 
     return this
   }
 
-  public withEndDate(data: Date): this {
-    this.properties.endDate = data
+  public withEndDate(endDate: Dayjs): this {
+    this.properties.endDate = endDate
 
     return this
   }
