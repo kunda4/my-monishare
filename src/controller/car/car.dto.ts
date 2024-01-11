@@ -1,4 +1,4 @@
-import { ApiProperty, PartialType, PickType } from '@nestjs/swagger'
+import { ApiProperty, PickType } from '@nestjs/swagger'
 import {
   IsEnum,
   IsInt,
@@ -8,6 +8,8 @@ import {
 } from 'class-validator'
 import { Nullable } from 'class-validator-extended'
 import { type Writable } from 'type-fest'
+
+import { StrictPartialType } from 'src/util/strict-partial-type'
 
 import {
   type Car,
@@ -148,6 +150,6 @@ export class CreateCarDTO extends PickType(CarDTO, [
   'info',
 ] as const) {}
 
-export class PatchCarDTO extends PartialType(
+export class PatchCarDTO extends StrictPartialType(
   PickType(CarDTO, ['name', 'state', 'licensePlate', 'info'] as const),
 ) {}

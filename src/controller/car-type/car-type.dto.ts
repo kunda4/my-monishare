@@ -1,7 +1,9 @@
-import { ApiProperty, OmitType, PartialType } from '@nestjs/swagger'
+import { ApiProperty, OmitType } from '@nestjs/swagger'
 import { IsInt, IsNotEmpty, IsPositive, IsString, IsUrl } from 'class-validator'
 import { Nullable } from 'class-validator-extended'
 import { type Writable } from 'type-fest'
+
+import { StrictPartialType } from 'src/util/strict-partial-type'
 
 import { type CarType, type CarTypeID } from '../../application'
 import { validate } from '../../util'
@@ -97,6 +99,6 @@ export class CreateCarTypeDTO extends OmitType(CarTypeDTO, ['id'] as const) {}
 // When updating a car type, we don't want an id (because that is not an updatable property, it will be provided as an
 // URL parameter). We also make all properties optional so that you can, for example, update the name of a car type
 // independently of the imageUrl.
-export class PatchCarTypeDTO extends PartialType(
+export class PatchCarTypeDTO extends StrictPartialType(
   OmitType(CarTypeDTO, ['id'] as const),
 ) {}
