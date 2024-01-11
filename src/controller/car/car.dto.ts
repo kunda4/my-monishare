@@ -9,8 +9,6 @@ import {
 import { Nullable } from 'class-validator-extended'
 import { type Writable } from 'type-fest'
 
-import { StrictPartialType } from 'src/util/strict-partial-type'
-
 import {
   type Car,
   type CarID,
@@ -20,6 +18,7 @@ import {
   type UserID,
 } from '../../application'
 import { validate } from '../../util'
+import { StrictPartialType } from '../../util/strict-partial-type'
 
 export class CarDTO {
   @ApiProperty({

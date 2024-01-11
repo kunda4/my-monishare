@@ -3,10 +3,9 @@ import { IsInt, IsNotEmpty, IsPositive, IsString, IsUrl } from 'class-validator'
 import { Nullable } from 'class-validator-extended'
 import { type Writable } from 'type-fest'
 
-import { StrictPartialType } from 'src/util/strict-partial-type'
-
 import { type CarType, type CarTypeID } from '../../application'
 import { validate } from '../../util'
+import { StrictPartialType } from '../../util/strict-partial-type'
 
 // This is a "Data Transfer Object" (see https://en.wikipedia.org/wiki/Data_transfer_object) for a car type. Its
 // purpose is to encapsulate and validate request and/or response data. They are scoped to controllers and should
