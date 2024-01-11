@@ -8,7 +8,6 @@ import {
   UseGuards,
   Post,
   Patch,
-  BadRequestException,
 } from '@nestjs/common'
 import {
   ApiBadRequestResponse,
@@ -21,7 +20,6 @@ import {
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger'
-import dayjs from 'dayjs'
 
 import {
   type BookingID,
@@ -101,22 +99,16 @@ export class BookingController {
     description: 'Internal sever error',
   })
   @Post()
-  public async insert(
+  public async create(
     @Body() data: CreateBookingDTO,
     @CurrentUser() renter: User,
   ): Promise<BookingDTO> {
     const state = BookingState.PENDING
     const renterId = renter.id
 
-    // if (!dayjs(data.startDate).isValid() || !dayjs(data.endDate).isValid()) {
-    //   throw new BadRequestException(
-    //     'Invalid date format. Dates must be in ISO 8601 format.',
-    //   )
-    // }
-
     const newData = { ...data, renterId, state }
 
-    const newBooking = await this.bookingService.insert(newData)
+    const newBooking = await this.bookingService.create(newData)
     return BookingDTO.fromModel(newBooking)
   }
 

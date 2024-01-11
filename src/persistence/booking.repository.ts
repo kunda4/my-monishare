@@ -58,7 +58,7 @@ export class BookingRepository implements IBookingRepository {
     return rows.map(row => rowToDomain(row))
   }
 
-  public async insert(
+  public async create(
     tx: Transaction,
     booking: Except<BookingProperties, 'id'>,
   ): Promise<Booking> {

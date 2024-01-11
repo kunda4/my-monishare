@@ -74,9 +74,9 @@ describe('BookingService', () => {
         .withStartDate(dayjs('2023-08-08T14:07:27.828Z'))
         .build()
 
-      bookingRepositoryMock.insert.mockResolvedValueOnce(booking)
+      bookingRepositoryMock.create.mockResolvedValueOnce(booking)
 
-      await expect(bookingService.insert(booking)).resolves.toBeInstanceOf(
+      await expect(bookingService.create(booking)).resolves.toBeInstanceOf(
         Booking,
       )
     })

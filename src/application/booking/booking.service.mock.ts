@@ -6,7 +6,7 @@ export function mockBookingService(): BookingServiceMock {
   return {
     get: jest.fn(),
     getAll: jest.fn(),
-    insert: jest.fn(),
+    create: jest.fn(),
     update: jest.fn(),
   }
 }

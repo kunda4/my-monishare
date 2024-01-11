@@ -5,7 +5,7 @@ import { type BookingID, type Booking, BookingProperties } from './booking'
 export abstract class IBookingService {
   public abstract get(bookingId: BookingID): Promise<Booking>
   public abstract getAll(): Promise<Booking[]>
-  public abstract insert(
+  public abstract create(
     data: Except<BookingProperties, 'id'>,
   ): Promise<Booking>
   public abstract update(
