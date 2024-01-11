@@ -108,11 +108,11 @@ export class BookingController {
     const state = BookingState.PENDING
     const renterId = renter.id
 
-    if (!dayjs(data.startDate).isValid() || !dayjs(data.endDate).isValid()) {
-      throw new BadRequestException(
-        'Invalid date format. Dates must be in ISO 8601 format.',
-      )
-    }
+    // if (!dayjs(data.startDate).isValid() || !dayjs(data.endDate).isValid()) {
+    //   throw new BadRequestException(
+    //     'Invalid date format. Dates must be in ISO 8601 format.',
+    //   )
+    // }
 
     const newData = { ...data, renterId, state }
 

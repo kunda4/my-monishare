@@ -1,6 +1,6 @@
 import { IsEnum, IsInt, IsPositive } from 'class-validator'
 import { IsDayjs } from 'class-validator-extended'
-import dayjs from 'dayjs'
+import dayjs, { type Dayjs } from 'dayjs'
 import { type Opaque } from 'type-fest'
 
 import { validate } from '../../util'
@@ -22,8 +22,8 @@ export type BookingProperties = {
   carId: CarID
   state: BookingState
   renterId: UserID
-  startDate: dayjs.Dayjs
-  endDate: dayjs.Dayjs
+  startDate: Dayjs
+  endDate: Dayjs
 }
 
 export class Booking {
@@ -43,18 +43,18 @@ export class Booking {
   public readonly state: BookingState
 
   @IsDayjs()
-  public readonly startDate: dayjs.Dayjs
+  public readonly startDate: Dayjs
 
   @IsDayjs()
-  public readonly endDate: dayjs.Dayjs
+  public readonly endDate: Dayjs
 
   public constructor(data: BookingProperties) {
     this.id = data.id
     this.carId = data.carId
     this.state = data.state
     this.renterId = data.renterId
-    this.startDate = data.startDate
-    this.endDate = data.endDate
+    this.startDate = dayjs(data.startDate)
+    this.endDate = dayjs(data.endDate)
     validate(this)
   }
 }

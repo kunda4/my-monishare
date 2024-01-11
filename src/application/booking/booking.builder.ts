@@ -1,4 +1,4 @@
-import dayjs from 'dayjs'
+import dayjs, { type Dayjs } from 'dayjs'
 import { type Except } from 'type-fest'
 
 import { Booking, type BookingID, type BookingProperties } from '../booking'
@@ -67,13 +67,13 @@ export class BookingBuilder {
     return this
   }
 
-  public withStartDate(startDate: dayjs.Dayjs): this {
+  public withStartDate(startDate: Dayjs): this {
     this.properties.startDate = startDate
 
     return this
   }
 
-  public withEndDate(endDate: dayjs.Dayjs): this {
+  public withEndDate(endDate: Dayjs): this {
     this.properties.endDate = endDate
 
     return this
