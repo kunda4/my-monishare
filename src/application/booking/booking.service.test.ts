@@ -1,4 +1,5 @@
-import { beforeEach, afterEach } from 'node:test'
+import dayjs from 'dayjs'
+
 import {
   type BookingRepositoryMock,
   type DatabaseConnectionMock,
@@ -6,7 +7,7 @@ import {
   mockDatabaseConnection,
 } from '../../mocks'
 
-import { Booking } from './booking'
+import { Booking, BookingID } from './booking'
 import { BookingNotFoundError } from './booking-not-found.error'
 import { BookingBuilder } from './booking.builder'
 import { BookingService } from './booking.service'
@@ -68,7 +69,10 @@ describe('BookingService', () => {
 
   describe('create and update', () => {
     it('should create a booking', async () => {
-      const booking = new BookingBuilder().withId(1).build()
+      const booking = new BookingBuilder()
+        .withId(1)
+        .withStartDate(dayjs('2023-08-08T14:07:27.828Z'))
+        .build()
 
       bookingRepositoryMock.insert.mockResolvedValueOnce(booking)
 
@@ -77,6 +81,25 @@ describe('BookingService', () => {
       )
     })
 
-    it('should update a booking', async () => {})
+    it('should update a booking', async () => {
+      const booking = new BookingBuilder().withId(1).build()
+
+      bookingRepositoryMock.get.mockResolvedValueOnce(booking)
+      bookingRepositoryMock.update.mockResolvedValueOnce(booking)
+
+      await expect(
+        bookingService.update(booking.id, booking),
+      ).resolves.toBeInstanceOf(Booking)
+    })
+
+    it('should fail if trying to update a booking that doesnt exist', async () => {
+      const booking = new BookingBuilder().withId(9990).build()
+
+      bookingRepositoryMock.get.mockResolvedValueOnce(null)
+
+      await expect(
+        bookingService.update(66 as BookingID, booking),
+      ).rejects.toThrow(BookingNotFoundError)
+    })
   })
 })

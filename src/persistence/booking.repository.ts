@@ -49,14 +49,8 @@ export class BookingRepository implements IBookingRepository {
     return maybeRow ? rowToDomain(maybeRow) : null
   }
 
-  public async get(tx: Transaction, id: BookingID): Promise<Booking> {
-    const booking = await this.find(tx, id)
-
-    if (!booking) {
-      throw new BookingNotFoundError(id)
-    }
-
-    return booking
+  public async get(tx: Transaction, id: BookingID): Promise<Booking | null> {
+    return await this.find(tx, id)
   }
 
   public async getAll(tx: Transaction): Promise<Booking[]> {

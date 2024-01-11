@@ -1,5 +1,6 @@
-import { IsDate, IsEnum, IsInt, IsPositive } from 'class-validator'
-import dayjs, { isDayjs } from 'dayjs'
+import { IsEnum, IsInt, IsPositive } from 'class-validator'
+import { IsDayjs } from 'class-validator-extended'
+import dayjs from 'dayjs'
 import { type Opaque } from 'type-fest'
 
 import { validate } from '../../util'
@@ -41,10 +42,10 @@ export class Booking {
   @IsEnum(BookingState)
   public readonly state: BookingState
 
-  @IsDate()
+  @IsDayjs()
   public readonly startDate: dayjs.Dayjs
 
-  @IsDate()
+  @IsDayjs()
   public readonly endDate: dayjs.Dayjs
 
   public constructor(data: BookingProperties) {

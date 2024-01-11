@@ -22,9 +22,13 @@ export class BookingService implements IBookingService {
   }
 
   public async get(id: BookingID): Promise<Booking> {
-    return this.databaseConnection.transactional(tx =>
-      this.bookingRepository.get(tx, id),
-    )
+    return this.databaseConnection.transactional(async tx => {
+      const booking = await this.bookingRepository.get(tx, id)
+      if (!booking) {
+        throw new BookingNotFoundError(id)
+      }
+      return booking
+    })
   }
 
   public async getAll(): Promise<Booking[]> {
