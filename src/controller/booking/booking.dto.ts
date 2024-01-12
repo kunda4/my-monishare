@@ -12,6 +12,7 @@ import {
 } from 'src/application'
 
 import { validate } from '../../util'
+import { IsDayjs } from 'class-validator-extended'
 
 export class BookingDTO {
   @ApiProperty({
@@ -59,7 +60,7 @@ export class BookingDTO {
     format: 'date-time',
     example: '2020-11-01T00:00:00.000Z',
   })
-  @IsDateString()
+  @IsDayjs()
   public readonly startDate!: Dayjs
 
   @ApiProperty({
@@ -68,7 +69,7 @@ export class BookingDTO {
     format: 'date-time',
     example: '2020-11-01T00:00:00.000Z',
   })
-  @IsDateString()
+  @IsDayjs()
   public readonly endDate!: Dayjs
 
   public static create(data: {
