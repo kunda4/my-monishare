@@ -1,4 +1,4 @@
-import dayjs from 'dayjs'
+import dayjs, { Dayjs } from 'dayjs'
 
 import {
   type BookingRepositoryMock,
@@ -6,9 +6,12 @@ import {
   mockBookingRepository,
   mockDatabaseConnection,
 } from '../../mocks'
+import { CarID } from '../car'
+import { UserID } from '../user'
 
 import { Booking, BookingID } from './booking'
 import { BookingNotFoundError } from './booking-not-found.error'
+import { BookingState } from './booking-state'
 import { BookingBuilder } from './booking.builder'
 import { BookingService } from './booking.service'
 
@@ -27,24 +30,16 @@ describe('BookingService', () => {
     )
   })
 
-  afterEach(() => jest.clearAllMocks())
-
-  it('should be defined', () => {
-    expect(bookingService).toBeDefined()
-  })
-
   describe('get', () => {
     it('should get single booking', async () => {
       const booking = new BookingBuilder().withId(1).build()
 
       bookingRepositoryMock.get.mockResolvedValueOnce(booking)
 
-      await expect(bookingService.get(booking.id)).resolves.toBeInstanceOf(
-        Booking,
-      )
+      await expect(bookingService.get(booking.id)).resolves.toBe(booking)
     })
 
-    it('should throw not found error if a wrong bookingId is given', async () => {
+    it('should throw not found error if the bookingId does not exist', async () => {
       const booking = new BookingBuilder().withId(2).build()
 
       bookingRepositoryMock.get.mockRejectedValueOnce(
@@ -61,26 +56,35 @@ describe('BookingService', () => {
 
       bookingRepositoryMock.getAll.mockResolvedValueOnce([booking])
 
-      await expect(bookingService.getAll()).resolves.toBeInstanceOf(
-        Array<Booking>,
-      )
+      await expect(bookingService.getAll()).resolves.toEqual([booking])
     })
   })
 
-  describe('create and update', () => {
+  describe('create booking', () => {
     it('should create a booking', async () => {
-      const booking = new BookingBuilder()
-        .withId(1)
-        .withStartDate(dayjs('2023-08-08T14:07:27.828Z'))
-        .build()
+      const booking = new Booking({
+        id: 1 as BookingID,
+        carId: 13 as CarID,
+        startDate: dayjs('2023-08-08T14:07:27.828Z'),
+        endDate: dayjs('2023-08-09T07:20:56.959Z'),
+        state: BookingState.PENDING,
+        renterId: 2 as UserID,
+      })
 
       bookingRepositoryMock.create.mockResolvedValueOnce(booking)
 
-      await expect(bookingService.create(booking)).resolves.toBeInstanceOf(
-        Booking,
-      )
+      await expect(
+        bookingService.create({
+          carId: 13 as CarID,
+          startDate: dayjs('2023-08-08T14:07:27.828Z'),
+          endDate: dayjs('2023-08-09T07:20:56.959Z'),
+          state: BookingState.PENDING,
+          renterId: 2 as UserID,
+        }),
+      ).resolves.toEqual(booking)
     })
-
+  })
+  describe('update booking', () => {
     it('should update a booking', async () => {
       const booking = new BookingBuilder().withId(1).build()
 

@@ -2,7 +2,6 @@ import {
   Body,
   Controller,
   Get,
-  NotFoundException,
   Param,
   ParseIntPipe,
   UseGuards,
@@ -24,7 +23,6 @@ import {
 import {
   type BookingID,
   IBookingService,
-  BookingNotFoundError,
   BookingState,
   User,
 } from '../../application'
@@ -78,9 +76,6 @@ export class BookingController {
       const booking = await this.bookingService.get(id)
       return BookingDTO.fromModel(booking)
     } catch (error) {
-      if (error instanceof BookingNotFoundError)
-        throw new NotFoundException('Booking not found')
-
       throw error
     }
   }
@@ -103,12 +98,12 @@ export class BookingController {
     @Body() data: CreateBookingDTO,
     @CurrentUser() renter: User,
   ): Promise<BookingDTO> {
-    const state = BookingState.PENDING
-    const renterId = renter.id
-
-    const newData = { ...data, renterId, state }
-
-    const newBooking = await this.bookingService.create(newData)
+    const newBookingData = {
+      ...data,
+      renterId: renter.id,
+      state: BookingState.PENDING,
+    }
+    const newBooking = await this.bookingService.create(newBookingData)
     return BookingDTO.fromModel(newBooking)
   }
 
@@ -137,9 +132,6 @@ export class BookingController {
       const booking = await this.bookingService.update(id, data)
       return BookingDTO.fromModel(booking)
     } catch (error) {
-      if (error instanceof BookingNotFoundError)
-        throw new NotFoundException('Booking not found')
-
       throw error
     }
   }

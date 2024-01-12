@@ -55,6 +55,7 @@ export class BookingService implements IBookingService {
       const updatedBooking = new Booking({
         ...booking,
         ...updateBooking,
+        id: booking.id,
       })
       return this.bookingRepository.update(tx, updatedBooking)
     })

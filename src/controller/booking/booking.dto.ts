@@ -59,12 +59,8 @@ export class BookingDTO {
     format: 'date-time',
     example: '2020-11-01T00:00:00.000Z',
   })
-  public readonly startDate!: Dayjs
-
   @IsDateString()
-  public get _startDate(): string {
-    return this.startDate.toISOString()
-  }
+  public readonly startDate!: Dayjs
 
   @ApiProperty({
     description: 'The end date of the booking.',
@@ -72,12 +68,8 @@ export class BookingDTO {
     format: 'date-time',
     example: '2020-11-01T00:00:00.000Z',
   })
-  public readonly endDate!: Dayjs
-
   @IsDateString()
-  public get _endDate(): string {
-    return this.startDate.toISOString()
-  }
+  public readonly endDate!: Dayjs
 
   public static create(data: {
     id: BookingID
