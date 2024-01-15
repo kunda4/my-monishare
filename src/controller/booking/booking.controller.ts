@@ -21,7 +21,9 @@ import {
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger'
-import dayjs from 'dayjs'
+import dayjs, { extend } from 'dayjs'
+import isSameOrAfter from 'dayjs/plugin/isSameOrAfter'
+extend(isSameOrAfter)
 
 import {
   type BookingID,
@@ -114,13 +116,19 @@ export class BookingController {
     @CurrentUser() renter: User,
   ): Promise<BookingDTO> {
     try {
+      const startDate = dayjs(data.startDate)
+      const endDate = dayjs(data.endDate)
+      if (dayjs().isSameOrAfter(startDate) || startDate.isAfter(endDate)) {
+        throw new BadRequestException('startDate must be before endDate')
+      }
       const newBookingData = {
         carId: data.carId,
-        startDate: dayjs(data.startDate),
-        endDate: dayjs(data.endDate),
         renterId: renter.id,
+        startDate,
+        endDate,
         state: BookingState.PENDING,
       }
+
       const newBooking = await this.bookingService.create(newBookingData)
       return BookingDTO.fromModel(newBooking)
     } catch (error) {
