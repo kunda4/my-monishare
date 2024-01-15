@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common'
 import { type Except } from 'type-fest'
 
 import { IDatabaseConnection } from '../../persistence'
+import { CarNotFoundError, ICarRepository } from '../car'
 
 import { Booking, BookingID, BookingProperties } from './booking'
 import { BookingNotFoundError } from './booking-not-found.error'
@@ -12,13 +13,16 @@ import { IBookingService } from './booking.service.interface'
 export class BookingService implements IBookingService {
   private readonly bookingRepository: IBookingRepository
   private readonly databaseConnection: IDatabaseConnection
+  private readonly carRepository: ICarRepository
 
   public constructor(
     bookingRepository: IBookingRepository,
     databaseConnection: IDatabaseConnection,
+    carRepository: ICarRepository,
   ) {
     this.bookingRepository = bookingRepository
     this.databaseConnection = databaseConnection
+    this.carRepository = carRepository
   }
 
   public async get(id: BookingID): Promise<Booking> {
@@ -39,7 +43,11 @@ export class BookingService implements IBookingService {
   }
 
   public async create(data: Except<BookingProperties, 'id'>): Promise<Booking> {
-    return this.databaseConnection.transactional(tx => {
+    return this.databaseConnection.transactional(async tx => {
+      const car = await this.carRepository.get(tx, data.carId)
+      if (!car) {
+        throw new CarNotFoundError(data.carId)
+      }
       return this.bookingRepository.create(tx, data)
     })
   }

@@ -7,6 +7,7 @@ import {
   UseGuards,
   Post,
   Patch,
+  BadRequestException,
 } from '@nestjs/common'
 import {
   ApiBadRequestResponse,
@@ -19,18 +20,20 @@ import {
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger'
+import dayjs from 'dayjs'
 
 import {
   type BookingID,
   IBookingService,
   BookingState,
   User,
+  UserID,
+  CarNotFoundError,
 } from '../../application'
 import { AuthenticationGuard } from '../authentication.guard'
 import { CurrentUser } from '../current-user.decorator'
 
 import { BookingDTO, CreateBookingDTO, PatchBookingDTO } from './booking.dto'
-import dayjs from 'dayjs'
 
 @ApiTags('Booking')
 @ApiBearerAuth()
@@ -72,6 +75,7 @@ export class BookingController {
   @Get(':id')
   public async get(
     @Param('id', ParseIntPipe) id: BookingID,
+    @CurrentUser() user: User,
   ): Promise<BookingDTO> {
     try {
       const booking = await this.bookingService.get(id)
@@ -99,15 +103,22 @@ export class BookingController {
     @Body() data: CreateBookingDTO,
     @CurrentUser() renter: User,
   ): Promise<BookingDTO> {
-    const newBookingData = {
-      carId: data.carId,
-      startDate: dayjs(data.startDate),
-      endDate: dayjs(data.endDate),
-      renterId: renter.id,
-      state: BookingState.PENDING,
+    try {
+      const newBookingData = {
+        carId: data.carId,
+        startDate: dayjs(data.startDate),
+        endDate: dayjs(data.endDate),
+        renterId: renter.id,
+        state: BookingState.PENDING,
+      }
+      const newBooking = await this.bookingService.create(newBookingData)
+      return BookingDTO.fromModel(newBooking)
+    } catch (error) {
+      if (error instanceof CarNotFoundError) {
+        throw new BadRequestException(error.message)
+      }
+      throw error
     }
-    const newBooking = await this.bookingService.create(newBookingData)
-    return BookingDTO.fromModel(newBooking)
   }
 
   @ApiOperation({
