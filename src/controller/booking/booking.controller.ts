@@ -32,6 +32,7 @@ import {
   User,
   CarNotFoundError,
   ICarService,
+  DateConflictError,
 } from '../../application'
 import { AuthenticationGuard } from '../authentication.guard'
 import { CurrentUser } from '../current-user.decorator'
@@ -132,7 +133,10 @@ export class BookingController {
       const newBooking = await this.bookingService.create(newBookingData)
       return BookingDTO.fromModel(newBooking)
     } catch (error) {
-      if (error instanceof CarNotFoundError) {
+      if (
+        error instanceof CarNotFoundError ||
+        error instanceof DateConflictError
+      ) {
         throw new BadRequestException(error.message)
       }
       throw error

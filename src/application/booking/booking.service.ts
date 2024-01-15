@@ -8,6 +8,7 @@ import { Booking, BookingID, BookingProperties } from './booking'
 import { BookingNotFoundError } from './booking-not-found.error'
 import { IBookingRepository } from './booking.repository.interface'
 import { IBookingService } from './booking.service.interface'
+import { DateConflictError } from './date-conflict.error'
 
 @Injectable()
 export class BookingService implements IBookingService {
@@ -58,7 +59,7 @@ export class BookingService implements IBookingService {
           data.startDate.isAfter(carBooking.endDate),
       )
       if (!isBookingAvailable) {
-        throw new CarNotFoundError(car.id)
+        throw new DateConflictError('Booking dates conflict with each other')
       }
       return this.bookingRepository.create(tx, data)
     })
