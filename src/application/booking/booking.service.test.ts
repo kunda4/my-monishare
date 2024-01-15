@@ -1,12 +1,15 @@
-import dayjs, { Dayjs } from 'dayjs'
+import dayjs from 'dayjs'
 
 import {
   type BookingRepositoryMock,
   type DatabaseConnectionMock,
   mockBookingRepository,
   mockDatabaseConnection,
+  CarRepositoryMock,
+  mockCarRepository,
 } from '../../mocks'
-import { CarID } from '../car'
+import { CarID, CarNotFoundError } from '../car'
+import { CarBuilder } from '../car/car.builder'
 import { UserID } from '../user'
 
 import { Booking, BookingID } from './booking'
@@ -19,14 +22,17 @@ describe('BookingService', () => {
   let bookingService: BookingService
   let bookingRepositoryMock: BookingRepositoryMock
   let databaseConnectionMock: DatabaseConnectionMock
+  let carRepositoryMock: CarRepositoryMock
 
   beforeEach(() => {
     bookingRepositoryMock = mockBookingRepository()
     databaseConnectionMock = mockDatabaseConnection()
+    carRepositoryMock = mockCarRepository()
 
     bookingService = new BookingService(
       bookingRepositoryMock,
       databaseConnectionMock,
+      carRepositoryMock,
     )
   })
 
@@ -62,6 +68,10 @@ describe('BookingService', () => {
 
   describe('create booking', () => {
     it('should create a booking', async () => {
+      const car = new CarBuilder().build()
+
+      carRepositoryMock.get.mockResolvedValue(car)
+
       const booking = new Booking({
         id: 1 as BookingID,
         carId: 13 as CarID,
@@ -82,6 +92,20 @@ describe('BookingService', () => {
           renterId: 2 as UserID,
         }),
       ).resolves.toEqual(booking)
+    })
+
+    it('should throw error when no car associated with car id', async () => {
+      carRepositoryMock.get.mockRejectedValue(new CarNotFoundError(1 as CarID))
+
+      await expect(
+        bookingService.create({
+          carId: 13 as CarID,
+          startDate: dayjs('2023-08-08T14:07:27.828Z'),
+          endDate: dayjs('2023-08-09T07:20:56.959Z'),
+          state: BookingState.PENDING,
+          renterId: 2 as UserID,
+        }),
+      ).rejects.toThrow(CarNotFoundError)
     })
   })
   describe('update booking', () => {
