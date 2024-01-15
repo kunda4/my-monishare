@@ -17,6 +17,7 @@ import { BookingNotFoundError } from './booking-not-found.error'
 import { BookingState } from './booking-state'
 import { BookingBuilder } from './booking.builder'
 import { BookingService } from './booking.service'
+import { DateConflictError } from './date-conflict.error'
 
 describe('BookingService', () => {
   let bookingService: BookingService
@@ -71,6 +72,7 @@ describe('BookingService', () => {
       const car = new CarBuilder().build()
 
       carRepositoryMock.get.mockResolvedValue(car)
+      bookingRepositoryMock.getCarBookings.mockResolvedValue([])
 
       const booking = new Booking({
         id: 1 as BookingID,
@@ -106,6 +108,31 @@ describe('BookingService', () => {
           renterId: 2 as UserID,
         }),
       ).rejects.toThrow(CarNotFoundError)
+    })
+
+    it('should not create booking when there is conflicting dates issue', async () => {
+      const car = new CarBuilder().withId(1).build()
+      const booking = new Booking({
+        id: 1 as BookingID,
+        carId: car.id,
+        startDate: dayjs('2023-08-08T14:07:27.828Z'),
+        endDate: dayjs('2023-08-09T07:20:56.959Z'),
+        state: BookingState.PENDING,
+        renterId: 2 as UserID,
+      })
+
+      carRepositoryMock.get.mockResolvedValue(car)
+      bookingRepositoryMock.getCarBookings.mockResolvedValue([booking])
+
+      await expect(
+        bookingService.create({
+          carId: 1 as CarID,
+          startDate: dayjs('2023-08-08T14:07:27.828Z'),
+          endDate: dayjs('2023-08-09T07:20:56.959Z'),
+          state: BookingState.PENDING,
+          renterId: 2 as UserID,
+        }),
+      ).rejects.toThrow(DateConflictError)
     })
   })
   describe('update booking', () => {
