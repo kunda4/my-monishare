@@ -48,6 +48,15 @@ export class BookingRepository implements IBookingRepository {
     )
     return maybeRow ? rowToDomain(maybeRow) : null
   }
+  public async getCarBookings(tx: Transaction, id: CarID): Promise<Booking[]> {
+    const maybeRow = await tx.manyOrNone<Row>(
+      'SELECT * FROM bookings WHERE car_id = $(id)',
+      {
+        id,
+      },
+    )
+    return maybeRow.map(row => rowToDomain(row))
+  }
 
   public async getAll(tx: Transaction): Promise<Booking[]> {
     const rows = await tx.manyOrNone<Row>('SELECT * FROM bookings')

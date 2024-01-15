@@ -48,6 +48,18 @@ export class BookingService implements IBookingService {
       if (!car) {
         throw new CarNotFoundError(data.carId)
       }
+      const carBookings = await this.bookingRepository.getCarBookings(
+        tx,
+        car.id,
+      )
+      const isBookingAvailable = carBookings.every(
+        carBooking =>
+          data.endDate.isBefore(carBooking.startDate) ||
+          data.startDate.isAfter(carBooking.endDate),
+      )
+      if (!isBookingAvailable) {
+        throw new CarNotFoundError(car.id)
+      }
       return this.bookingRepository.create(tx, data)
     })
   }
