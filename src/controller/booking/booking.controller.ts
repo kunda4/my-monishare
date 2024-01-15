@@ -8,6 +8,7 @@ import {
   Post,
   Patch,
   BadRequestException,
+  UnauthorizedException,
 } from '@nestjs/common'
 import {
   ApiBadRequestResponse,
@@ -27,8 +28,8 @@ import {
   IBookingService,
   BookingState,
   User,
-  UserID,
   CarNotFoundError,
+  ICarService,
 } from '../../application'
 import { AuthenticationGuard } from '../authentication.guard'
 import { CurrentUser } from '../current-user.decorator'
@@ -47,7 +48,10 @@ import { BookingDTO, CreateBookingDTO, PatchBookingDTO } from './booking.dto'
 @UseGuards(AuthenticationGuard)
 @Controller('booking')
 export class BookingController {
-  public constructor(private readonly bookingService: IBookingService) {}
+  public constructor(
+    private readonly bookingService: IBookingService,
+    private readonly carService: ICarService,
+  ) {}
 
   @ApiOperation({
     summary: 'Retrieve all bookings.',
@@ -79,6 +83,12 @@ export class BookingController {
   ): Promise<BookingDTO> {
     try {
       const booking = await this.bookingService.get(id)
+      const car = await this.carService.get(booking.carId)
+      if (car.ownerId !== user.id && booking.renterId !== user.id) {
+        throw new UnauthorizedException(
+          'You are not allowed to access this booking.',
+        )
+      }
       return BookingDTO.fromModel(booking)
     } catch (error) {
       throw error
