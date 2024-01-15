@@ -30,6 +30,7 @@ import { AuthenticationGuard } from '../authentication.guard'
 import { CurrentUser } from '../current-user.decorator'
 
 import { BookingDTO, CreateBookingDTO, PatchBookingDTO } from './booking.dto'
+import dayjs from 'dayjs'
 
 @ApiTags('Booking')
 @ApiBearerAuth()
@@ -99,7 +100,9 @@ export class BookingController {
     @CurrentUser() renter: User,
   ): Promise<BookingDTO> {
     const newBookingData = {
-      ...data,
+      carId: data.carId,
+      startDate: dayjs(data.startDate),
+      endDate: dayjs(data.endDate),
       renterId: renter.id,
       state: BookingState.PENDING,
     }

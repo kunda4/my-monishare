@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common'
-import dayjs, { type Dayjs } from 'dayjs'
+import dayjs from 'dayjs'
 import { type Except } from 'type-fest'
 
 import {
