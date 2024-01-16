@@ -1,11 +1,14 @@
-import { Injectable } from '@nestjs/common'
+import { BadRequestException, Injectable } from '@nestjs/common'
 import { type Except } from 'type-fest'
+
+import { PatchBookingDTO } from 'src/controller/booking/booking.dto'
 
 import { IDatabaseConnection } from '../../persistence'
 import { CarNotFoundError, ICarRepository } from '../car'
 
 import { Booking, BookingID, BookingProperties } from './booking'
 import { BookingNotFoundError } from './booking-not-found.error'
+import { ValidBookingStates } from './booking-state'
 import { IBookingRepository } from './booking.repository.interface'
 import { IBookingService } from './booking.service.interface'
 import { DateConflictError } from './date-conflict.error'
@@ -66,12 +69,16 @@ export class BookingService implements IBookingService {
   }
   public async update(
     bookingId: BookingID,
-    updateBooking: Partial<Except<BookingProperties, 'id'>>,
+    updateBooking: PatchBookingDTO,
   ): Promise<Booking> {
     return this.databaseConnection.transactional(async tx => {
       const booking = await this.bookingRepository.get(tx, bookingId)
       if (!booking) {
         throw new BookingNotFoundError(bookingId)
+      }
+      console.log(updateBooking.state)
+      if (!ValidBookingStates[booking.state].includes(updateBooking.state)) {
+        throw new BadRequestException('Invalid state to be updated')
       }
       const updatedBooking = new Booking({
         ...booking,
