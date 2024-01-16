@@ -1,5 +1,7 @@
 import { Except } from 'type-fest'
 
+import { PatchBookingDTO } from '../../controller/booking/booking.dto'
+
 import { type BookingID, type Booking, BookingProperties } from './booking'
 
 export abstract class IBookingService {
@@ -10,6 +12,6 @@ export abstract class IBookingService {
   ): Promise<Booking>
   public abstract update(
     bookingId: BookingID,
-    updates: Partial<Except<BookingProperties, 'id'>>,
+    updates: PatchBookingDTO,
   ): Promise<Booking>
 }

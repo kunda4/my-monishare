@@ -16,8 +16,7 @@ import { Booking, BookingID } from './booking'
 import { BookingState } from './booking-state'
 import { BookingBuilder } from './booking.builder'
 import { BookingService } from './booking.service'
-import { BookingNotFoundError } from './error/booking-not-found.error'
-import { DateConflictError } from './error/date-conflict.error'
+import { BookingNotFoundError, DateConflictError } from './error'
 
 describe('BookingService', () => {
   let bookingService: BookingService

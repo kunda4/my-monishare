@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable } from '@nestjs/common'
+import { Injectable } from '@nestjs/common'
 import { type Except } from 'type-fest'
 
 import { PatchBookingDTO } from 'src/controller/booking/booking.dto'
@@ -10,9 +10,11 @@ import { Booking, BookingID, BookingProperties } from './booking'
 import { ValidBookingStates } from './booking-state'
 import { IBookingRepository } from './booking.repository.interface'
 import { IBookingService } from './booking.service.interface'
-import { BookingNotFoundError } from './error/booking-not-found.error'
-import { DateConflictError } from './error/date-conflict.error'
-import { InvalidStateChange } from './error/invalid-state-change.error'
+import {
+  BookingNotFoundError,
+  DateConflictError,
+  InvalidStateChange,
+} from './error'
 
 @Injectable()
 export class BookingService implements IBookingService {

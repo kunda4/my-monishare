@@ -34,11 +34,11 @@ import {
   ICarService,
   DateConflictError,
 } from '../../application'
+import { InvalidStateChange } from '../../application/booking/error'
 import { AuthenticationGuard } from '../authentication.guard'
 import { CurrentUser } from '../current-user.decorator'
 
 import { BookingDTO, CreateBookingDTO, PatchBookingDTO } from './booking.dto'
-import { InvalidStateChange } from 'src/application/booking/error/invalid-state-change.error'
 
 @ApiTags('Booking')
 @ApiBearerAuth()
