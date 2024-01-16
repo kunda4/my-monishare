@@ -38,6 +38,7 @@ import { AuthenticationGuard } from '../authentication.guard'
 import { CurrentUser } from '../current-user.decorator'
 
 import { BookingDTO, CreateBookingDTO, PatchBookingDTO } from './booking.dto'
+import { InvalidStateChange } from 'src/application/booking/error/invalid-state-change.error'
 
 @ApiTags('Booking')
 @ApiBearerAuth()
@@ -168,6 +169,8 @@ export class BookingController {
       const booking = await this.bookingService.update(id, data)
       return BookingDTO.fromModel(booking)
     } catch (error) {
+      if (error instanceof InvalidStateChange)
+        throw new BadRequestException(error.message)
       throw error
     }
   }
