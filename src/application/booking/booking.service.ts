@@ -7,7 +7,7 @@ import { IDatabaseConnection } from '../../persistence'
 import { CarNotFoundError, ICarRepository } from '../car'
 
 import { Booking, BookingID, BookingProperties } from './booking'
-import { ValidBookingStates } from './booking-state'
+import { BookingState, ValidBookingStates } from './booking-state'
 import { IBookingRepository } from './booking.repository.interface'
 import { IBookingService } from './booking.service.interface'
 import {
@@ -15,6 +15,7 @@ import {
   DateConflictError,
   InvalidStateChange,
 } from './error'
+import dayjs from 'dayjs'
 
 @Injectable()
 export class BookingService implements IBookingService {
@@ -79,10 +80,21 @@ export class BookingService implements IBookingService {
       if (!booking) {
         throw new BookingNotFoundError(bookingId)
       }
-      console.log(updateBooking.state)
+
       if (!ValidBookingStates[booking.state].includes(updateBooking.state)) {
-        throw new InvalidStateChange()
+        throw new InvalidStateChange('Invalid booking state change')
       }
+
+      if (
+        updateBooking.state === BookingState.PICKED_UP &&
+        (dayjs().isBefore(booking.startDate) ||
+          dayjs().isAfter(booking.endDate))
+      ) {
+        throw new InvalidStateChange(
+          'You are not allowed to pick up car before start date or after end date',
+        )
+      }
+
       const updatedBooking = new Booking({
         ...booking,
         ...updateBooking,
