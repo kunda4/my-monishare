@@ -19,6 +19,7 @@ import {
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger'
+import dayjs from 'dayjs'
 
 import {
   type BookingID,
@@ -30,7 +31,6 @@ import { AuthenticationGuard } from '../authentication.guard'
 import { CurrentUser } from '../current-user.decorator'
 
 import { BookingDTO, CreateBookingDTO, PatchBookingDTO } from './booking.dto'
-import dayjs from 'dayjs'
 
 @ApiTags('Booking')
 @ApiBearerAuth()
