@@ -5,8 +5,11 @@ import {
   mockDatabaseConnection,
   mockCarTypeService,
   CarTypeServiceMock,
+  BookingRepositoryMock,
+  mockBookingRepository,
 } from '../../mocks'
 import { AccessDeniedError } from '../access-denied.error'
+import { BookingBuilder } from '../booking/booking.builder'
 import { UserBuilder } from '../user/user.builder'
 
 import { CarBuilder } from './car.builder'
@@ -17,16 +20,19 @@ describe('CarService', () => {
   let carRepositoryMock: CarRepositoryMock
   let databaseConnectionMock: DatabaseConnectionMock
   let carTypeServiceMock: CarTypeServiceMock
+  let bookingRepositoryMock: BookingRepositoryMock
 
   beforeEach(() => {
     carRepositoryMock = mockCarRepository()
     carTypeServiceMock = mockCarTypeService()
     databaseConnectionMock = mockDatabaseConnection()
+    bookingRepositoryMock = mockBookingRepository()
 
     carService = new CarService(
       carRepositoryMock,
       databaseConnectionMock,
       carTypeServiceMock,
+      bookingRepositoryMock,
     )
   })
 
@@ -37,9 +43,11 @@ describe('CarService', () => {
       const owner = new UserBuilder().build()
       const car = new CarBuilder().withOwner(owner).withHorsepower(50).build()
       const updatedCar = CarBuilder.from(car).withHorsepower(555).build()
+      const booking = new BookingBuilder().withCar(car.id).build()
 
       carRepositoryMock.get.mockResolvedValue(car)
       carRepositoryMock.update.mockResolvedValue(updatedCar)
+      bookingRepositoryMock.getCarBookings.mockResolvedValue([booking])
       await expect(
         carService.update(car.id, { horsepower: 555 }, owner.id),
       ).resolves.toEqual(updatedCar)

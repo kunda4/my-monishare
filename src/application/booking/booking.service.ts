@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common'
+import dayjs from 'dayjs'
 import { type Except } from 'type-fest'
 
 import { PatchBookingDTO } from 'src/controller/booking/booking.dto'
@@ -15,7 +16,6 @@ import {
   DateConflictError,
   InvalidStateChange,
 } from './error'
-import dayjs from 'dayjs'
 
 @Injectable()
 export class BookingService implements IBookingService {

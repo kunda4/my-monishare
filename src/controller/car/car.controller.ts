@@ -24,6 +24,8 @@ import {
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger'
 
+import { MissingBookingError } from 'src/application/booking/error'
+
 import {
   Car,
   type CarID,
@@ -149,6 +151,9 @@ export class CarController {
       }
       if (error instanceof DuplicateLicensePlateError) {
         throw new ConflictException(error.message)
+      }
+      if (error instanceof MissingBookingError) {
+        throw new BadRequestException(error.message)
       }
       throw error
     }
