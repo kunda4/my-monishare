@@ -16,7 +16,11 @@ import { Booking, BookingID } from './booking'
 import { BookingState } from './booking-state'
 import { BookingBuilder } from './booking.builder'
 import { BookingService } from './booking.service'
-import { BookingNotFoundError, DateConflictError } from './error'
+import {
+  BookingNotFoundError,
+  DateConflictError,
+  InvalidStateChange,
+} from './error'
 
 describe('BookingService', () => {
   let bookingService: BookingService
@@ -142,7 +146,7 @@ describe('BookingService', () => {
       bookingRepositoryMock.update.mockResolvedValueOnce(booking)
 
       await expect(
-        bookingService.update(booking.id, booking),
+        bookingService.update(booking.id, { state: BookingState.ACCEPTED }),
       ).resolves.toBeInstanceOf(Booking)
     })
 
@@ -154,6 +158,50 @@ describe('BookingService', () => {
       await expect(
         bookingService.update(66 as BookingID, booking),
       ).rejects.toThrow(BookingNotFoundError)
+    })
+
+    it('should fail if trying to update booking with invalid state', async () => {
+      const booking = new BookingBuilder().build()
+
+      bookingRepositoryMock.get.mockResolvedValueOnce(booking)
+
+      await expect(
+        bookingService.update(10 as BookingID, {
+          state: BookingState.RETURNED,
+        }),
+      ).rejects.toThrow(InvalidStateChange)
+    })
+
+    it('should fail if trying to pickup car before start date', async () => {
+      const booking = new BookingBuilder()
+        .withState(BookingState.ACCEPTED)
+        .withStartDate(dayjs().add(1, 'day'))
+        .withEndDate(dayjs().add(7, 'day'))
+        .build()
+
+      bookingRepositoryMock.get.mockResolvedValueOnce(booking)
+
+      await expect(
+        bookingService.update(10 as BookingID, {
+          state: BookingState.PICKED_UP,
+        }),
+      ).rejects.toThrow(InvalidStateChange)
+    })
+
+    it('should fail if trying to pickup car after end date', async () => {
+      const booking = new BookingBuilder()
+        .withState(BookingState.ACCEPTED)
+        .withStartDate(dayjs().subtract(10, 'day'))
+        .withEndDate(dayjs().subtract(5, 'day'))
+        .build()
+
+      bookingRepositoryMock.get.mockResolvedValueOnce(booking)
+
+      await expect(
+        bookingService.update(10 as BookingID, {
+          state: BookingState.PICKED_UP,
+        }),
+      ).rejects.toThrow(InvalidStateChange)
     })
   })
 })
