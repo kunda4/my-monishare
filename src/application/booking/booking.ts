@@ -9,12 +9,6 @@ import { type UserID } from '../user'
 
 import { BookingState } from './booking-state'
 
-/**********************************************************************************************************************\
-   *                                                                                                                     *
-   *   This file is already fully implemented. You don't need to modify it to successfully finish your project.          *
-   *                                                                                                                     *
-   \*********************************************************************************************************************/
-
 export type BookingID = Opaque<number, 'booking-id'>
 
 export type BookingProperties = {
