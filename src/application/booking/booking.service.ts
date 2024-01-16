@@ -7,11 +7,12 @@ import { IDatabaseConnection } from '../../persistence'
 import { CarNotFoundError, ICarRepository } from '../car'
 
 import { Booking, BookingID, BookingProperties } from './booking'
-import { BookingNotFoundError } from './booking-not-found.error'
 import { ValidBookingStates } from './booking-state'
 import { IBookingRepository } from './booking.repository.interface'
 import { IBookingService } from './booking.service.interface'
-import { DateConflictError } from './date-conflict.error'
+import { BookingNotFoundError } from './error/booking-not-found.error'
+import { DateConflictError } from './error/date-conflict.error'
+import { InvalidStateChange } from './error/invalid-state-change.error'
 
 @Injectable()
 export class BookingService implements IBookingService {
@@ -78,7 +79,7 @@ export class BookingService implements IBookingService {
       }
       console.log(updateBooking.state)
       if (!ValidBookingStates[booking.state].includes(updateBooking.state)) {
-        throw new BadRequestException('Invalid state to be updated')
+        throw new InvalidStateChange()
       }
       const updatedBooking = new Booking({
         ...booking,

@@ -13,11 +13,11 @@ import { CarBuilder } from '../car/car.builder'
 import { UserID } from '../user'
 
 import { Booking, BookingID } from './booking'
-import { BookingNotFoundError } from './booking-not-found.error'
 import { BookingState } from './booking-state'
 import { BookingBuilder } from './booking.builder'
 import { BookingService } from './booking.service'
-import { DateConflictError } from './date-conflict.error'
+import { BookingNotFoundError } from './error/booking-not-found.error'
+import { DateConflictError } from './error/date-conflict.error'
 
 describe('BookingService', () => {
   let bookingService: BookingService
