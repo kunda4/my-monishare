@@ -1,8 +1,13 @@
-import { Injectable, Logger } from '@nestjs/common'
+import { BadRequestException, Injectable, Logger } from '@nestjs/common'
 import { type Except } from 'type-fest'
 
 import { IDatabaseConnection } from '../../persistence/database-connection.interface'
 import { AccessDeniedError } from '../access-denied.error'
+import {
+  BookingNotFoundError,
+  BookingState,
+  IBookingRepository,
+} from '../booking'
 import { CarTypeNotFoundError } from '../car-type/car-type-not-found.error'
 import { ICarTypeService } from '../car-type/car-type.service.interface'
 import { type UserID } from '../user'
@@ -11,6 +16,11 @@ import { Car, type CarID, type CarProperties } from './car'
 import { ICarRepository } from './car.repository.interface'
 import { type ICarService } from './car.service.interface'
 import { DuplicateLicensePlateError } from './error'
+import { CarNotFoundError } from './car-not-found.error'
+import dayjs, { extend } from 'dayjs'
+import isSameOrBefore from 'dayjs/plugin/isSameOrBefore'
+import { MissingBookingError } from '../booking/error'
+extend(isSameOrBefore)
 
 @Injectable()
 export class CarService implements ICarService {
@@ -18,16 +28,19 @@ export class CarService implements ICarService {
   private readonly databaseConnection: IDatabaseConnection
   private readonly logger: Logger
   private readonly carTypeService: ICarTypeService
+  private readonly bookingRepository: IBookingRepository
 
   public constructor(
     carRepository: ICarRepository,
     databaseConnection: IDatabaseConnection,
     carTypeService: ICarTypeService,
+    bookingRepository: IBookingRepository,
   ) {
     this.carRepository = carRepository
     this.databaseConnection = databaseConnection
     this.logger = new Logger(CarService.name)
     this.carTypeService = carTypeService
+    this.bookingRepository = bookingRepository
   }
 
   public async create(data: Except<CarProperties, 'id'>): Promise<Car> {
@@ -67,8 +80,34 @@ export class CarService implements ICarService {
   ): Promise<Car> {
     return this.databaseConnection.transactional(async tx => {
       const car = await this.carRepository.get(tx, carId)
-      if (car.ownerId !== currentUserId) {
+      if (!car) {
+        throw new CarNotFoundError(carId)
+      }
+
+      const carBookings = await this.bookingRepository.getCarBookings(
+        tx,
+        car.id,
+      )
+      const booking = carBookings.find(
+        carBooking =>
+          carBooking.renterId === currentUserId &&
+          dayjs().isSameOrAfter(carBooking.startDate) &&
+          dayjs().isSameOrBefore(carBooking.endDate) &&
+          carBooking.state === BookingState.PICKED_UP,
+      )
+
+      if (!booking) {
+        throw new MissingBookingError('No car bookings found')
+      }
+
+      if (![car.ownerId, booking.renterId].includes(currentUserId)) {
         throw new AccessDeniedError(car.name, car.id)
+      }
+      
+      if (booking.renterId === currentUserId) {
+        updates = {
+          state: updates.state,
+        }
       }
 
       if (updates.carTypeId) {
