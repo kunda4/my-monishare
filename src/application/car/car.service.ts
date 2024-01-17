@@ -5,10 +5,7 @@ import { type Except } from 'type-fest'
 
 import { IDatabaseConnection } from '../../persistence/database-connection.interface'
 import { AccessDeniedError } from '../access-denied.error'
-import {
-  BookingState,
-  IBookingRepository,
-} from '../booking'
+import { BookingState, IBookingRepository } from '../booking'
 import { MissingBookingError } from '../booking/error'
 import { CarTypeNotFoundError } from '../car-type/car-type-not-found.error'
 import { ICarTypeService } from '../car-type/car-type.service.interface'
@@ -84,6 +81,30 @@ export class CarService implements ICarService {
         throw new CarNotFoundError(carId)
       }
 
+      let updatedCar = new Car({
+        ...car,
+        ...updates,
+      })
+
+      if(car.ownerId === currentUserId){
+        
+        if (updates.carTypeId) {
+          throw new CarTypeNotFoundError(updates.carTypeId)
+        }
+
+        if (updates.licensePlate) {
+          const carWithLicensePlate = await this.carRepository.findByLicensePlate(
+            tx,
+            updates.licensePlate,
+          )
+          if (carWithLicensePlate && carWithLicensePlate.id !== car.id)
+            throw new DuplicateLicensePlateError(updates.licensePlate)
+        }
+
+        return this.carRepository.update(tx, updatedCar)
+      }
+    
+
       const carBookings = await this.bookingRepository.getCarBookings(
         tx,
         car.id,
@@ -100,32 +121,16 @@ export class CarService implements ICarService {
         throw new MissingBookingError('No car bookings found')
       }
 
-      if (![car.ownerId, booking.renterId].includes(currentUserId)) {
+      if (booking.renterId !== currentUserId) {
         throw new AccessDeniedError(car.name, car.id)
       }
 
-      if (booking.renterId === currentUserId) {
-        updates = {
-          state: updates.state,
-        }
-      }
+        updatedCar = new Car({
+          ...car,
+          state: updates.state|| car.state ,
+        })
 
-      if (updates.carTypeId) {
-        throw new CarTypeNotFoundError(updates.carTypeId)
-      }
-      if (updates.licensePlate) {
-        const carWithLicensePlate = await this.carRepository.findByLicensePlate(
-          tx,
-          updates.licensePlate,
-        )
-        if (carWithLicensePlate && carWithLicensePlate.id !== car.id)
-          throw new DuplicateLicensePlateError(updates.licensePlate)
-      }
-      const updatedCar = new Car({
-        ...car,
-        ...updates,
-      })
-      return this.carRepository.update(tx, updatedCar)
+        return this.carRepository.update(tx, updatedCar)
     })
   }
 }
