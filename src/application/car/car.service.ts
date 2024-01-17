@@ -86,25 +86,6 @@ export class CarService implements ICarService {
         ...updates,
       })
 
-      if(car.ownerId === currentUserId){
-        
-        if (updates.carTypeId) {
-          throw new CarTypeNotFoundError(updates.carTypeId)
-        }
-
-        if (updates.licensePlate) {
-          const carWithLicensePlate = await this.carRepository.findByLicensePlate(
-            tx,
-            updates.licensePlate,
-          )
-          if (carWithLicensePlate && carWithLicensePlate.id !== car.id)
-            throw new DuplicateLicensePlateError(updates.licensePlate)
-        }
-
-        return this.carRepository.update(tx, updatedCar)
-      }
-    
-
       const carBookings = await this.bookingRepository.getCarBookings(
         tx,
         car.id,
@@ -117,20 +98,41 @@ export class CarService implements ICarService {
           carBooking.state === BookingState.PICKED_UP,
       )
 
+      if (
+        booking?.renterId !== currentUserId &&
+        car.ownerId !== currentUserId
+      ) {
+        throw new AccessDeniedError(car.name, car.id)
+      }
+
+      if (car.ownerId === currentUserId) {
+        if (updates.carTypeId) {
+          throw new CarTypeNotFoundError(updates.carTypeId)
+        }
+
+        if (updates.licensePlate) {
+          const carWithLicensePlate =
+            await this.carRepository.findByLicensePlate(
+              tx,
+              updates.licensePlate,
+            )
+          if (carWithLicensePlate && carWithLicensePlate.id !== car.id)
+            throw new DuplicateLicensePlateError(updates.licensePlate)
+        }
+
+        return this.carRepository.update(tx, updatedCar)
+      }
+
       if (!booking) {
         throw new MissingBookingError('No car bookings found')
       }
 
-      if (booking.renterId !== currentUserId) {
-        throw new AccessDeniedError(car.name, car.id)
-      }
+      updatedCar = new Car({
+        ...car,
+        state: updates.state || car.state,
+      })
 
-        updatedCar = new Car({
-          ...car,
-          state: updates.state|| car.state ,
-        })
-
-        return this.carRepository.update(tx, updatedCar)
+      return this.carRepository.update(tx, updatedCar)
     })
   }
 }

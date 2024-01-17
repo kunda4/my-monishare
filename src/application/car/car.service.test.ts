@@ -65,6 +65,7 @@ describe('CarService', () => {
       const car = new CarBuilder().withOwner(55).withHorsepower(60).build()
 
       carRepositoryMock.get.mockResolvedValue(car)
+      bookingRepositoryMock.getCarBookings.mockResolvedValue([])
 
       await expect(
         carService.update(car.id, { horsepower: 555 }, owner.id),
