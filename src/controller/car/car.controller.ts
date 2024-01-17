@@ -24,8 +24,6 @@ import {
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger'
 
-import { MissingBookingError } from 'src/application/booking/error'
-
 import {
   Car,
   type CarID,
@@ -35,6 +33,7 @@ import {
   AccessDeniedError,
   CarTypeNotFoundError,
 } from '../../application'
+import { MissingBookingError } from '../../application/booking/error'
 import { DuplicateLicensePlateError } from '../../application/car/error'
 import { AuthenticationGuard } from '../authentication.guard'
 import { CurrentUser } from '../current-user.decorator'
