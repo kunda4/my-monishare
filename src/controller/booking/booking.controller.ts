@@ -7,6 +7,8 @@ import {
   UseGuards,
   Post,
   Patch,
+  BadRequestException,
+  UnauthorizedException,
 } from '@nestjs/common'
 import {
   ApiBadRequestResponse,
@@ -19,14 +21,21 @@ import {
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger'
-import dayjs from 'dayjs'
+
+import dayjs, { extend } from 'dayjs'
+import isSameOrAfter from 'dayjs/plugin/isSameOrAfter'
+extend(isSameOrAfter)
 
 import {
   type BookingID,
   IBookingService,
   BookingState,
   User,
+  CarNotFoundError,
+  ICarService,
+  DateConflictError,
 } from '../../application'
+import { InvalidStateChange } from '../../application/booking/error'
 import { AuthenticationGuard } from '../authentication.guard'
 import { CurrentUser } from '../current-user.decorator'
 
@@ -44,7 +53,10 @@ import { BookingDTO, CreateBookingDTO, PatchBookingDTO } from './booking.dto'
 @UseGuards(AuthenticationGuard)
 @Controller('booking')
 export class BookingController {
-  public constructor(private readonly bookingService: IBookingService) {}
+  public constructor(
+    private readonly bookingService: IBookingService,
+    private readonly carService: ICarService,
+  ) {}
 
   @ApiOperation({
     summary: 'Retrieve all bookings.',
@@ -72,9 +84,16 @@ export class BookingController {
   @Get(':id')
   public async get(
     @Param('id', ParseIntPipe) id: BookingID,
+    @CurrentUser() user: User,
   ): Promise<BookingDTO> {
     try {
       const booking = await this.bookingService.get(id)
+      const car = await this.carService.get(booking.carId)
+      if (car.ownerId !== user.id && booking.renterId !== user.id) {
+        throw new UnauthorizedException(
+          'You are not allowed to access this booking.',
+        )
+      }
       return BookingDTO.fromModel(booking)
     } catch (error) {
       throw error
@@ -99,15 +118,31 @@ export class BookingController {
     @Body() data: CreateBookingDTO,
     @CurrentUser() renter: User,
   ): Promise<BookingDTO> {
-    const newBookingData = {
-      carId: data.carId,
-      startDate: dayjs(data.startDate),
-      endDate: dayjs(data.endDate),
-      renterId: renter.id,
-      state: BookingState.PENDING,
+    try {
+      const startDate = dayjs(data.startDate)
+      const endDate = dayjs(data.endDate)
+      if (dayjs().isSameOrAfter(startDate) || startDate.isAfter(endDate)) {
+        throw new BadRequestException('startDate must be before endDate')
+      }
+      const newBookingData = {
+        carId: data.carId,
+        renterId: renter.id,
+        startDate,
+        endDate,
+        state: BookingState.PENDING,
+      }
+
+      const newBooking = await this.bookingService.create(newBookingData)
+      return BookingDTO.fromModel(newBooking)
+    } catch (error) {
+      if (
+        error instanceof CarNotFoundError ||
+        error instanceof DateConflictError
+      ) {
+        throw new BadRequestException(error.message)
+      }
+      throw error
     }
-    const newBooking = await this.bookingService.create(newBookingData)
-    return BookingDTO.fromModel(newBooking)
   }
 
   @ApiOperation({
@@ -135,6 +170,8 @@ export class BookingController {
       const booking = await this.bookingService.update(id, data)
       return BookingDTO.fromModel(booking)
     } catch (error) {
+      if (error instanceof InvalidStateChange)
+        throw new BadRequestException(error.message)
       throw error
     }
   }

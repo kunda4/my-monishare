@@ -33,6 +33,7 @@ import {
   AccessDeniedError,
   CarTypeNotFoundError,
 } from '../../application'
+import { MissingBookingError } from '../../application/booking/error'
 import { DuplicateLicensePlateError } from '../../application/car/error'
 import { AuthenticationGuard } from '../authentication.guard'
 import { CurrentUser } from '../current-user.decorator'
@@ -149,6 +150,9 @@ export class CarController {
       }
       if (error instanceof DuplicateLicensePlateError) {
         throw new ConflictException(error.message)
+      }
+      if (error instanceof MissingBookingError) {
+        throw new BadRequestException(error.message)
       }
       throw error
     }

@@ -1,24 +1,36 @@
 import { Injectable } from '@nestjs/common'
+import dayjs from 'dayjs'
 import { type Except } from 'type-fest'
 
+import { PatchBookingDTO } from 'src/controller/booking/booking.dto'
+
 import { IDatabaseConnection } from '../../persistence'
+import { CarNotFoundError, ICarRepository } from '../car'
 
 import { Booking, BookingID, BookingProperties } from './booking'
-import { BookingNotFoundError } from './booking-not-found.error'
+import { BookingState, ValidBookingStates } from './booking-state'
 import { IBookingRepository } from './booking.repository.interface'
 import { IBookingService } from './booking.service.interface'
+import {
+  BookingNotFoundError,
+  DateConflictError,
+  InvalidStateChange,
+} from './error'
 
 @Injectable()
 export class BookingService implements IBookingService {
   private readonly bookingRepository: IBookingRepository
   private readonly databaseConnection: IDatabaseConnection
+  private readonly carRepository: ICarRepository
 
   public constructor(
     bookingRepository: IBookingRepository,
     databaseConnection: IDatabaseConnection,
+    carRepository: ICarRepository,
   ) {
     this.bookingRepository = bookingRepository
     this.databaseConnection = databaseConnection
+    this.carRepository = carRepository
   }
 
   public async get(id: BookingID): Promise<Booking> {
@@ -39,19 +51,50 @@ export class BookingService implements IBookingService {
   }
 
   public async create(data: Except<BookingProperties, 'id'>): Promise<Booking> {
-    return this.databaseConnection.transactional(tx => {
+    return this.databaseConnection.transactional(async tx => {
+      const car = await this.carRepository.get(tx, data.carId)
+      if (!car) {
+        throw new CarNotFoundError(data.carId)
+      }
+      const carBookings = await this.bookingRepository.getCarBookings(
+        tx,
+        car.id,
+      )
+      const isBookingAvailable = carBookings.every(
+        carBooking =>
+          data.endDate.isBefore(carBooking.startDate) ||
+          data.startDate.isAfter(carBooking.endDate),
+      )
+      if (!isBookingAvailable) {
+        throw new DateConflictError('Booking dates conflict with each other')
+      }
       return this.bookingRepository.create(tx, data)
     })
   }
   public async update(
     bookingId: BookingID,
-    updateBooking: Partial<Except<BookingProperties, 'id'>>,
+    updateBooking: PatchBookingDTO,
   ): Promise<Booking> {
     return this.databaseConnection.transactional(async tx => {
       const booking = await this.bookingRepository.get(tx, bookingId)
       if (!booking) {
         throw new BookingNotFoundError(bookingId)
       }
+
+      if (!ValidBookingStates[booking.state].includes(updateBooking.state)) {
+        throw new InvalidStateChange('Invalid booking state change')
+      }
+
+      if (
+        updateBooking.state === BookingState.PICKED_UP &&
+        (dayjs().isBefore(booking.startDate) ||
+          dayjs().isAfter(booking.endDate))
+      ) {
+        throw new InvalidStateChange(
+          'You are not allowed to pick up car before start date or after end date',
+        )
+      }
+
       const updatedBooking = new Booking({
         ...booking,
         ...updateBooking,
