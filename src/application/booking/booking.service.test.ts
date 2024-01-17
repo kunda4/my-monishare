@@ -56,7 +56,7 @@ describe('BookingService', () => {
         new BookingNotFoundError(booking.id),
       )
 
-      await expect(bookingService.get(booking.id)).rejects.toBeInstanceOf(
+      await expect(bookingService.get(booking.id)).rejects.toThrow(
         BookingNotFoundError,
       )
     })

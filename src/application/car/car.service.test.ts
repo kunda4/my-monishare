@@ -13,8 +13,10 @@ import {
 import { AccessDeniedError } from '../access-denied.error'
 import { BookingState } from '../booking'
 import { BookingBuilder } from '../booking/booking.builder'
+import { MissingBookingError } from '../booking/error'
 import { UserBuilder } from '../user/user.builder'
 
+import { CarState } from './car-state'
 import { CarBuilder } from './car.builder'
 import { CarService } from './car.service'
 
@@ -69,7 +71,41 @@ describe('CarService', () => {
 
       await expect(
         carService.update(car.id, { horsepower: 555 }, owner.id),
-      ).rejects.toBeInstanceOf(AccessDeniedError)
+      ).rejects.toThrow(AccessDeniedError)
+    })
+    it('should throw an error if you are not renter', async () => {
+      const car = new CarBuilder().withOwner(55).withHorsepower(60).build()
+      const booking = new BookingBuilder()
+        .withCar(car.id)
+        .withState(BookingState.PICKED_UP)
+        .withStartDate(dayjs().subtract(1, 'day'))
+        .withEndDate(dayjs().add(2, 'months'))
+        .build()
+
+      carRepositoryMock.get.mockResolvedValue(car)
+      bookingRepositoryMock.getCarBookings.mockResolvedValue([])
+
+      await expect(
+        carService.update(car.id, { horsepower: 555 }, booking.renterId),
+      ).rejects.toThrow(AccessDeniedError)
+    })
+    it('should throw an error if renter update the car whose state is not pickup', async () => {
+      const car = new CarBuilder().withOwner(55).withHorsepower(60).build()
+      const renter = new UserBuilder().withId(3).build()
+      const booking = new BookingBuilder()
+        .withCar(car.id)
+        .withRenter(renter.id)
+        .withState(BookingState.RETURNED)
+        .withStartDate(dayjs().subtract(5, 'day'))
+        .withEndDate(dayjs().add(1, 'months'))
+        .build()
+
+      carRepositoryMock.get.mockResolvedValue(car)
+      bookingRepositoryMock.getCarBookings.mockResolvedValue([booking])
+
+      await expect(
+        carService.update(car.id, { state: CarState.UNLOCKED }, renter.id),
+      ).rejects.toThrow(MissingBookingError)
     })
   })
 })
