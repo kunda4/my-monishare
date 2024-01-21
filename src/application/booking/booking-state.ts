@@ -6,14 +6,12 @@ export enum BookingState {
   RETURNED = 'RETURNED',
 }
 
-type ValidBookingStatesType = {
-  [key in BookingState]: BookingState[]
-}
+type ValidBookingStatesType = Record<BookingState, BookingState[]>
 
-export const ValidBookingStates: ValidBookingStatesType = {
+export const ValidBookingStatesTransitions: ValidBookingStatesType = {
   [BookingState.PENDING]: [BookingState.ACCEPTED, BookingState.DECLINED],
   [BookingState.ACCEPTED]: [BookingState.PICKED_UP],
   [BookingState.PICKED_UP]: [BookingState.RETURNED],
-  [BookingState.DECLINED]: [],
   [BookingState.RETURNED]: [],
+  [BookingState.DECLINED]: [],
 }
