@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common'
 import { Except } from 'type-fest'
 
 import { Car, IcarRepository } from 'src/application/car/car'
+import { CarNotFoundError } from 'src/application/car/car-not-found.error'
 import { CarState } from 'src/application/car/car-state'
 import { ICarRepository } from 'src/application/car/car.repository.interface'
 import { FuelType } from 'src/application/car/fuel-type'
@@ -14,7 +15,7 @@ import {
   type CarTypeID,
   type ICarRepository,
   type UserID,
-} from '../application'
+} from '../application/car/car'
 
 import { type Transaction } from './database-connection.interface'
 
@@ -54,5 +55,15 @@ export class CarRepository implements ICarRepository {
       },
     )
     return maybeRow ? rowToDomain(maybeRow) : null
+  }
+
+  public async get(tx: Transaction, id: CarID): Promise<Car> {
+    const car = await this.find(tx, id)
+
+    if (!car) {
+      throw new CarNotFoundError(id)
+    }
+
+    return car
   }
 }
