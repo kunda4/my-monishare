@@ -28,7 +28,7 @@ export type CarProperties = {
   info: string | null
 }
 
-export class CarType {
+export class Car {
   @IsInt()
   @IsPositive()
   public readonly id: CarID
