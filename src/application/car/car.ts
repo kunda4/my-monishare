@@ -23,7 +23,7 @@ export type CarProperties = {
   ownerId: UserID
   state: CarState
   fuelType: FuelType
-  horsepower: number
+  horsePower: number
   licensePlate: string | null
   info: string | null
 }
@@ -53,7 +53,7 @@ export class Car {
 
   @IsInt()
   @IsPositive()
-  public readonly horsepower: number
+  public readonly horsePower: number
 
   @IsString()
   @Nullable()
@@ -71,7 +71,7 @@ export class Car {
     this.ownerId = data.ownerId
     this.state = data.state
     this.fuelType = data.fuelType
-    this.horsepower = data.horsepower
+    this.horsePower = data.horsePower
     this.licensePlate = data.licensePlate
     this.info = data.info
 
