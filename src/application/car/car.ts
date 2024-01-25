@@ -36,7 +36,7 @@ export class Car {
 
   @IsInt()
   @IsPositive()
-  public readonly CarTypeId: CarTypeID
+  public readonly carTypeId: CarTypeID
 
   @IsString()
   @IsNotEmpty()
@@ -67,7 +67,7 @@ export class Car {
 
   public constructor(data: CarProperties) {
     this.id = data.id
-    this.CarTypeId = data.carTypeId
+    this.carTypeId = data.carTypeId
     this.name = data.name
     this.ownerId = data.ownerId
     this.state = data.state

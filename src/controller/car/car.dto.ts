@@ -23,8 +23,8 @@ export class CarDTO {
   @IsPositive()
   public readonly id!: CarID
 
-  @IsString()
-  @IsNotEmpty()
+  @IsInt()
+  @IsPositive()
   public readonly carTypeId!: CarTypeID
 
   @IsString()
