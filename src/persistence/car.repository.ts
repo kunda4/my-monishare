@@ -1,11 +1,8 @@
 import { Injectable } from '@nestjs/common'
 import { Except } from 'type-fest'
 
-import { Car, IcarRepository } from 'src/application/car/car'
+import { Car } from 'src/application/car/car'
 import { CarNotFoundError } from 'src/application/car/car-not-found.error'
-import { CarState } from 'src/application/car/car-state'
-import { ICarRepository } from 'src/application/car/car.repository.interface'
-import { FuelType } from 'src/application/car/fuel-type'
 
 import {
   type CarID,
@@ -13,9 +10,9 @@ import {
   type CarState,
   type FuelType,
   type CarTypeID,
-  type ICarRepository,
   type UserID,
-} from '../application/car/car'
+} from '../application'
+import { ICarRepository } from '../application/car/car.repository.interface'
 
 import { type Transaction } from './database-connection.interface'
 
