@@ -9,6 +9,7 @@ import { Nullable } from 'class-validator-extended'
 import { type Opaque } from 'type-fest'
 
 import { validate } from '../../util'
+import { CarTypeID } from '../car-type'
 import { UserID } from '../user'
 
 import { CarState } from './car-state'
@@ -18,7 +19,7 @@ export type CarID = Opaque<number, 'car-id'>
 
 export type CarProperties = {
   id: CarID
-  carTypeId: number
+  carTypeId: CarTypeID
   name: string
   ownerId: UserID
   state: CarState
@@ -35,7 +36,7 @@ export class Car {
 
   @IsInt()
   @IsPositive()
-  public readonly CarTypeId: number
+  public readonly CarTypeId: CarTypeID
 
   @IsString()
   @IsNotEmpty()
