@@ -17,6 +17,8 @@ import {
   FuelType,
 } from '../../application'
 import { validate } from '../../util'
+import { ESLint } from 'eslint'
+import { PickType } from '@nestjs/swagger'
 
 export class CarDTO {
   @IsInt()
@@ -84,3 +86,12 @@ export class CarDTO {
     return CarDTO.create(car)
   }
 }
+
+export class CreateCarDTO extends PickType(CarDTO, [
+  'carTypeId',
+  'name',
+  'fuelType',
+  'horsepower',
+  'licensePlate',
+  'info',
+] as const) {}
