@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common'
+import { Except } from 'type-fest'
 
-import { Car } from 'src/application/car/car'
+import { Car, CarProperties } from 'src/application/car/car'
 import { CarNotFoundError } from 'src/application/car/car-not-found.error'
 
 import {
@@ -64,5 +65,34 @@ export class CarRepository implements ICarRepository {
   public async getAll(tx: Transaction): Promise<Car[]> {
     const rows = await tx.any<Row>('SELECT * FROM cars')
     return rows.map(row => rowToDomain(row))
+  }
+
+  public async insert(
+    tx: Transaction,
+    car: Except<CarProperties, 'id'>,
+  ): Promise<Car> {
+    const row = await tx.one<Row>(
+      `INSERT INTO cars(
+      car_type_id,
+      owner_id,
+      name,
+      state,
+      fuel_type,
+      horsepower,
+      license_plate,
+      info
+    )VALUES(
+      $(carTypeId)
+      $(ownerId),
+      $(name),
+      $(state),
+      $(fuelType),
+      $(horsepower),
+      $(licensePlate),
+      $(info)
+    )RETURNING *`,
+      { ...car },
+    )
+    return rowToDomain(row)
   }
 }
