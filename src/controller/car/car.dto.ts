@@ -43,7 +43,7 @@ export class CarDTO {
 
   @IsInt()
   @IsPositive()
-  public readonly horsePower!: number
+  public readonly horsepower!: number
 
   @Nullable()
   @IsString()
@@ -61,7 +61,7 @@ export class CarDTO {
     state: CarState
     ownerId: UserID
     fuelType: FuelType
-    horsePower: number
+    horsepower: number
     licensePlate: string | null
     info: string | null
   }): CarDTO {
@@ -73,7 +73,7 @@ export class CarDTO {
     instance.state = data.state
     instance.ownerId = data.ownerId
     instance.fuelType = data.fuelType
-    instance.horsePower = data.horsePower
+    instance.horsepower = data.horsepower
     instance.licensePlate = data.licensePlate
     instance.info = data.info
 

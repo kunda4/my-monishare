@@ -1,12 +1,10 @@
 import { Injectable } from '@nestjs/common'
-import { Except } from 'type-fest'
 
 import { Car } from 'src/application/car/car'
 import { CarNotFoundError } from 'src/application/car/car-not-found.error'
 
 import {
   type CarID,
-  type CarProperties,
   type CarState,
   type FuelType,
   type CarTypeID,
@@ -23,7 +21,7 @@ type Row = {
   owner_id: number
   state: string
   fuel_type: string
-  horse_power: number
+  horsepower: number
   license_plate: string | null
   info: string | null
 }
@@ -36,7 +34,7 @@ function rowToDomain(row: Row): Car {
     ownerId: row.owner_id as UserID,
     state: row.state as CarState,
     fuelType: row.fuel_type as FuelType,
-    horsePower: row.horse_power,
+    horsepower: row.horsepower,
     licensePlate: row.license_plate,
     info: row.info,
   })
