@@ -16,7 +16,7 @@ export abstract class ICarRepository {
     properties: Except<CarProperties, 'id'>,
   ): Promise<Car>
 
-  public abstract findByLincensePlate(
+  public abstract findByLicensePlate(
     tx: Transaction,
     licensePlate: string,
   ): Promise<Car | null>
