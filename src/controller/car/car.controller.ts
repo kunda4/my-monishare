@@ -1,4 +1,14 @@
-import { Controller, Get, Param, ParseIntPipe } from '@nestjs/common'
+import {
+  Body,
+  ConflictException,
+  Controller,
+  Get,
+  Param,
+  ParseIntPipe,
+  Post,
+} from '@nestjs/common'
+
+import { DuplicateLicensePlateError } from 'src/application/car/duplicate-license-plate.error'
 
 import {
   Car,
@@ -6,11 +16,15 @@ import {
   ICarService,
   IUserService,
   UserID,
+  CarProperties,
+  User,
+  CarState,
 } from '../../application'
 import { AuthenticationGuard } from '../authentication.guard'
+import { CurrentUser } from '../current-user.decorator'
 import { UserDTO } from '../user'
 
-import { CarDTO } from './car.dto'
+import { CarDTO, CreateCarDTO } from './car.dto'
 
 @Controller('/cars')
 export class CarController {
@@ -30,5 +44,25 @@ export class CarController {
   public async getAll(): Promise<CarDTO[]> {
     const cars = await this.carService.getAll()
     return cars.map(car => CarDTO.fromModel(car))
+  }
+
+  @Post()
+  public async create(
+    @CurrentUser() owner: User,
+    @Body() data: CreateCarDTO,
+  ): Promise<CarDTO> {
+    try {
+      const ownerId = owner.id
+      const state = CarState.LOCKED
+      const newData = { ...data, ownerId, state }
+
+      const newCar = await this.carService.create(newData)
+      return CarDTO.fromModel(newCar)
+    } catch (error) {
+      if (error instanceof DuplicateLicensePlateError) {
+        throw new ConflictException(error.message)
+      }
+      throw error
+    }
   }
 }
