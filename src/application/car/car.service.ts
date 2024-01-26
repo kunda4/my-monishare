@@ -30,4 +30,9 @@ export class CarService implements ICarService {
       this.carRepository.get(tx, id),
     )
   }
-}
+
+  public async getAll(): Promise<Car[]>{
+    return this.databaseConnection.transactional(tx =>{
+      this.carRepository.getAll(tx)
+    })
+  }
