@@ -25,4 +25,7 @@ export class CarController {
     const car = await this.carService.get(id)
     return CarDTO.fromModel(car)
   }
+
+  @Get()
+  public async getAll()
 }
