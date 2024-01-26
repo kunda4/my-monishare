@@ -17,11 +17,11 @@ export class CarService implements ICarService {
   private readonly logger: Logger
 
   public constructor(
-    CarRepository: ICarRepository,
-    DatabaseConnection: IDatabaseConnection,
+    carRepository: ICarRepository,
+    databaseConnection: IDatabaseConnection,
   ) {
-    this.carRepository = CarRepository
-    this.databaseConnection = DatabaseConnection
+    this.carRepository = carRepository
+    this.databaseConnection = databaseConnection
     this.logger = new Logger(CarService.name)
   }
 

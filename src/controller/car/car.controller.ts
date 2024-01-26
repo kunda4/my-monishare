@@ -1,4 +1,4 @@
-import { Get, Param, ParseIntPipe } from '@nestjs/common'
+import { Controller, Get, Param, ParseIntPipe } from '@nestjs/common'
 
 import {
   Car,
@@ -12,6 +12,7 @@ import { UserDTO } from '../user'
 
 import { CarDTO } from './car.dto'
 
+@Controller('/cars')
 export class CarController {
   private readonly carService: ICarService
 
