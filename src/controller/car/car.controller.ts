@@ -27,5 +27,8 @@ export class CarController {
   }
 
   @Get()
-  public async getAll()
+  public async getAll(): Promise<CarDTO[]> {
+    const cars = await this.carService.getAll()
+    return cars.map(car => CarDTO.fromModel(car))
+  }
 }

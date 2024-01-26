@@ -61,4 +61,8 @@ export class CarRepository implements ICarRepository {
 
     return car
   }
+  public async getAll(tx: Transaction): Promise<Car[]> {
+    const rows = await tx.any<Row>('SELECT * FROM cars')
+    return rows.map(row => rowToDomain(row))
+  }
 }
