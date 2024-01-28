@@ -6,6 +6,7 @@ import {
   Param,
   ParseIntPipe,
   Post,
+  UseGuards,
 } from '@nestjs/common'
 
 import { DuplicateLicensePlateError } from 'src/application/car/duplicate-license-plate.error'
@@ -26,6 +27,7 @@ import { UserDTO } from '../user'
 
 import { CarDTO, CreateCarDTO } from './car.dto'
 
+// @UseGuards(AuthenticationGuard)
 @Controller('/cars')
 export class CarController {
   private readonly carService: ICarService

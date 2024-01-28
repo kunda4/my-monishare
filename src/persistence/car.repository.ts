@@ -1,8 +1,7 @@
 import { Injectable } from '@nestjs/common'
-import { Except } from 'type-fest'
-
+import { CarNotFoundError } from 'src/application/car'
 import { Car, CarProperties } from 'src/application/car/car'
-import { CarNotFoundError } from 'src/application/car/car-not-found.error'
+import { Except } from 'type-fest'
 
 import {
   type CarID,
@@ -65,6 +64,22 @@ export class CarRepository implements ICarRepository {
   public async getAll(tx: Transaction): Promise<Car[]> {
     const rows = await tx.any<Row>('SELECT * FROM cars')
     return rows.map(row => rowToDomain(row))
+  }
+
+  public async findByLicensePlate(
+    tx: Transaction,
+    licensePlate: string,
+  ): Promise<Car | null> {
+    const row = await tx.oneOrNone<Row>(
+      `
+      SELECT * FROM cars
+      WHERE license_plate = $(licensePlate)
+      `,
+      {
+        licensePlate,
+      },
+    )
+    return row ? rowToDomain(row) : null
   }
 
   public async insert(
