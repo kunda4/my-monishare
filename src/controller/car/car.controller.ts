@@ -27,7 +27,7 @@ import { UserDTO } from '../user'
 
 import { CarDTO, CreateCarDTO } from './car.dto'
 
-// @UseGuards(AuthenticationGuard)
+@UseGuards(AuthenticationGuard)
 @Controller('/cars')
 export class CarController {
   private readonly carService: ICarService

@@ -1,6 +1,4 @@
 import { Injectable } from '@nestjs/common'
-import { CarNotFoundError } from 'src/application/car'
-import { Car, CarProperties } from 'src/application/car/car'
 import { Except } from 'type-fest'
 
 import {
@@ -10,6 +8,8 @@ import {
   type CarTypeID,
   type UserID,
 } from '../application'
+import { CarNotFoundError } from '../application'
+import { Car, CarProperties } from '../application/car/car'
 import { ICarRepository } from '../application/car/car.repository.interface'
 
 import { type Transaction } from './database-connection.interface'
@@ -89,24 +89,24 @@ export class CarRepository implements ICarRepository {
     const row = await tx.one<Row>(
       `INSERT INTO cars(
       car_type_id,
-      owner_id,
       name,
+      owner_id,
       state,
       fuel_type,
       horsepower,
       license_plate,
       info
     )VALUES(
-      $(carTypeId)
-      $(ownerId),
+      $(carTypeId),
       $(name),
+      $(ownerId),
       $(state),
       $(fuelType),
       $(horsepower),
       $(licensePlate),
       $(info)
     )RETURNING *`,
-      { ...car },
+      car,
     )
     return rowToDomain(row)
   }

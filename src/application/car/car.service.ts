@@ -1,13 +1,13 @@
 import { Injectable, Logger } from '@nestjs/common'
+import { Except } from 'type-fest'
 
-import { IDatabaseConnection } from '../../persistence/'
+import { IDatabaseConnection } from '../../persistence'
 import { ICarTypeService } from '../car-type/car-type.service.interface'
 
 import { Car, type CarID, CarProperties } from './car'
 import { ICarRepository } from './car.repository.interface'
 import { ICarService } from './car.service.interface'
 import { DuplicateLicensePlateError } from './duplicate-license-plate.error'
-import { Except } from 'type-fest'
 
 @Injectable()
 export class CarService implements ICarService {
@@ -44,7 +44,6 @@ export class CarService implements ICarService {
   public async create(data: Except<CarProperties, 'id'>): Promise<Car> {
     return this.databaseConnection.transactional(async tx => {
       await this.carTypeService.get(data.carTypeId)
-
       if (data.licensePlate) {
         const carWithLicensePlate = await this.carRepository.findByLicensePlate(
           tx,

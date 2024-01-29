@@ -1,3 +1,4 @@
+import { PickType } from '@nestjs/swagger'
 import {
   IsEnum,
   IsInt,
@@ -6,6 +7,7 @@ import {
   IsString,
 } from 'class-validator'
 import { Nullable } from 'class-validator-extended'
+import { ESLint } from 'eslint'
 import { type Writable } from 'type-fest'
 
 import {
@@ -17,8 +19,6 @@ import {
   FuelType,
 } from '../../application'
 import { validate } from '../../util'
-import { ESLint } from 'eslint'
-import { PickType } from '@nestjs/swagger'
 
 export class CarDTO {
   @IsInt()
