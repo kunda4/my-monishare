@@ -5,5 +5,4 @@ import {
   mockDatabaseConnection,
   mockCarTypeService,
   CarTypeServiceMock,
-  mockBookingRepository,
 } from '../../mocks'
